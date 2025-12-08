@@ -1,55 +1,56 @@
-#include "AppDelegate.h"   // ÒıÈëÓ¦ÓÃ³ÌĞòÎ¯ÍĞÀàÍ·ÎÄ¼ş
-#include "Scene/MenuScene.h"  // ÒıÈë³¡¾°ÀàÍ·ÎÄ¼ş
+#include "AppDelegate.h"   // åº”ç”¨ç¨‹åºå§”æ‰˜å¤´æ–‡ä»¶
+#include "Factory/SceneFactory/SceneFactory.h"
+#include "Factory/SceneFactory/SceneFactoryRegistry.h"
 #include "Global/Global.h"
 
 
-// ÊÇ·ñÆôÓÃÒôÆµÒıÇæ
+// æ˜¯å¦ä½¿ç”¨éŸ³é¢‘å¼•æ“
 // #define USE_AUDIO_ENGINE 1
 #if USE_AUDIO_ENGINE
 #include "audio/include/AudioEngine.h"
 using namespace cocos2d::experimental;
 #endif
 
-// Ê¹ÓÃcocos2dµÄÈ«¾ÖÃüÃû¿Õ¼ä£¬±ÜÃâÃ¿´Î¶¼Ğ´Cocos2d::
+// ä½¿ç”¨cocos2dçš„å…¨å±€å‘½åç©ºé—´ï¼Œè¿™æ ·ä¸ç”¨æ¯æ¬¡éƒ½å†™Cocos2d::
 USING_NS_CC;  
 
-// ÓÃÓÚÉèÖÃÉè¼Æ·Ö±æÂÊ
-static cocos2d::Size designResolutionSize = cocos2d::Size(1024, 768);  // Éè¼Æ·Ö±æÂÊ
-static cocos2d::Size smallResolutionSize = cocos2d::Size(800, 600);    // Ğ¡·Ö±æÂÊ
-static cocos2d::Size mediumResolutionSize = cocos2d::Size(1600, 1200); // ÖĞ·Ö±æÂÊ
-static cocos2d::Size largeResolutionSize = cocos2d::Size(2048, 1536);  // ´ó·Ö±æÂÊ
+// å®šä¹‰ä¸åŒè®¾å¤‡åˆ†è¾¨ç‡
+static cocos2d::Size designResolutionSize = cocos2d::Size(1024, 768);  // è®¾è®¡åˆ†è¾¨ç‡
+static cocos2d::Size smallResolutionSize = cocos2d::Size(800, 600);    // å°åˆ†è¾¨ç‡
+static cocos2d::Size mediumResolutionSize = cocos2d::Size(1600, 1200); // ä¸­åˆ†è¾¨ç‡
+static cocos2d::Size largeResolutionSize = cocos2d::Size(2048, 1536);  // å¤§åˆ†è¾¨ç‡
 
-// Îö¹¹º¯Êı
+// ææ„å‡½æ•°
 AppDelegate::~AppDelegate() 
 {
 #if USE_AUDIO_ENGINE
-    AudioEngine::end();   // Èç¹ûÆôÓÃÁËÒôÆµÒıÇæ£¬ÊÍ·Å×ÊÔ´
+    AudioEngine::end();   // å¦‚æœä½¿ç”¨äº†éŸ³é¢‘å¼•æ“ï¼Œé‡Šæ”¾éŸ³é¢‘èµ„æº
 #endif
 }
 
-// ³õÊ¼»¯OpenGLÉÏÏÂÎÄÊôĞÔ
+// åˆå§‹åŒ–OpenGLä¸Šä¸‹æ–‡å±æ€§
 void AppDelegate::initGLContextAttrs()
 {
     GLContextAttrs glContextAttrs = {8, 8, 8, 8, 24, 8, 0};
     GLView::setGLContextAttrs(glContextAttrs);
 }
 
-//Èç¹ûÊ¹ÓÃµÚÈı·½¿â£¬ĞèÒªÔÚÕâÀï×¢²á
+//å¦‚æœä½¿ç”¨çš„ç¬¬ä¸‰æ–¹åº“ï¼Œéœ€è¦åœ¨è¿™é‡Œæ³¨å†Œ
 static int register_all_packages()
 {
-    return 0; // ±íÊ¾Ã»ÓĞÍâ²¿°üĞèÒª×¢²á
+    return 0; // è¡¨ç¤ºæ²¡æœ‰å¤–éƒ¨åº“éœ€è¦æ³¨å†Œ
 }
 
-// Ó¦ÓÃ³ÌĞòÍê³ÉÆô¶¯²¢×¼±¸½øÈëÖ÷Ñ­»·Ê±µ÷ÓÃ
+// åº”ç”¨ç¨‹åºå¯åŠ¨å®Œæˆæ—¶è°ƒç”¨ï¼Œåˆå§‹åŒ–æ¸¸æˆåœºæ™¯å’Œæ¸¸æˆå¾ªç¯æ—¶è°ƒç”¨
 bool AppDelegate::applicationDidFinishLaunching() {
 
-    // »ñÈ¡µ¼ÑİÀàÊµÀı£¬µ¼ÑİÀà¸ºÔğ¹ÜÀí³¡¾°ÇĞ»»ºÍÖ¡ÂÊ¿ØÖÆ
+    // è·å–å¯¼æ¼”å®ä¾‹ï¼Œè´Ÿè´£ç®¡ç†åœºæ™¯åˆ‡æ¢å’Œå¸§ç‡æ§åˆ¶
     auto director = Director::getInstance();
 
-	// »ñÈ¡OpenGLÊÓÍ¼
+	// è·å–OpenGLè§†å›¾
     auto glview = director->getOpenGLView();
 
-	// Èç¹ûOpenGLÊÓÍ¼Îª¿Õ,´´ÔìÒ»¸öĞÂµÄÊÓÍ¼
+	// å¦‚æœOpenGLè§†å›¾ä¸ºç©ºï¼Œåˆ›å»ºä¸€ä¸ªæ–°çš„è§†å›¾
     if(!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
         glview = GLViewImpl::createWithRect("cocos", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
@@ -60,18 +61,18 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
 
 
-    // ´ò¿ª FPS ÏÔÊ¾£¬±ãÓÚµ÷ÊÔ
+    // è®¾ç½® FPS æ˜¾ç¤ºåœ¨å³ä¸‹è§’
     director->setDisplayStats(true);
 
-    // ÉèÖÃÖ¡ÂÊ£¬Ä¬ÈÏÖµÎª 1.0/60£¬¼´Ã¿Ãë 60 Ö¡
+    // è®¾ç½®å¸§ç‡ï¼Œé»˜è®¤å€¼ä¸º 1.0/60ï¼Œå³æ¯ç§’ 60 å¸§
     director->setAnimationInterval(1.0f / 60);
 
-    // ÉèÖÃÉè¼Æ·Ö±æÂÊ
+    // è®¾ç½®è®¾è®¡åˆ†è¾¨ç‡
     glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
     
-    // »ñÈ¡Éè±¸µÄÊµ¼Ê·Ö±æÂÊ
+    // è·å–è®¾å¤‡çš„å®é™…åˆ†è¾¨ç‡
     auto frameSize = glview->getFrameSize();
-    // ¸ù¾İÉè±¸·Ö±æÂÊµ÷ÕûÄÚÈİËõ·Å±ÈÀı
+    // æ ¹æ®è®¾å¤‡åˆ†è¾¨ç‡çš„ä¸åŒï¼Œè®¾ç½®ä¸åŒçš„ç¼©æ”¾æ¯”ä¾‹
     if (frameSize.height > mediumResolutionSize.height)
     {        
         director->setContentScaleFactor(MIN(largeResolutionSize.height/designResolutionSize.height, largeResolutionSize.width/designResolutionSize.width));
@@ -85,33 +86,43 @@ bool AppDelegate::applicationDidFinishLaunching() {
         director->setContentScaleFactor(MIN(smallResolutionSize.height/designResolutionSize.height, smallResolutionSize.width/designResolutionSize.width));
     }
 
-    // ×¢²áËùÓĞÍâ²¿°ü£¨ÔİÊ±Ã»ÓĞ£©
+    // æ³¨å†Œæ‰€æœ‰å¤–éƒ¨åŒ…ï¼ˆæš‚æ—¶æ²¡æœ‰ï¼‰
     register_all_packages();
 
-    // ´´½¨Ò»¸ö³¡¾°¶ÔÏó£¬²¢ÔËĞĞ
-    auto scene = MenuScene::createScene();
+    // æ³¨å†Œæ‰€æœ‰åœºæ™¯å·¥å‚
+    SceneFactoryRegistry::registerAllFactories();
+
+    // ä½¿ç”¨å·¥å‚åˆ›å»ºèœå•åœºæ™¯ï¼ˆç”¨æˆ·ç‚¹å‡»æŒ‰é’®åè¿›å…¥å†œåœºï¼‰
+    auto factoryManager = SceneFactoryManager::getInstance();
+    cocos2d::Scene* scene = factoryManager->createScene(SceneType::HENU_SCENE);
+    
+    if (!scene) {
+        CCLOG("Critical: Failed to create menu scene, exiting.");
+        return false;
+    }
+    
     director->runWithScene(scene);
 
     return true;
 }
 
-// µ±Ó¦ÓÃ³ÌĞò½øÈëºóÌ¨Ê±µ÷ÓÃ£¨Èç½Óµ½µç»°»òÓÃ»§°´ÏÂ Home ¼ü£©
+// å½“åº”ç”¨ç¨‹åºè¿›å…¥åå°æ—¶è°ƒç”¨ï¼Œæ¯”å¦‚æ¥åˆ°ç”µè¯æˆ–ç”¨æˆ·æŒ‰ Home é”®
 void AppDelegate::applicationDidEnterBackground() {
-    // Í£Ö¹¶¯»­£¬ÔİÍ£ÓÎÏ·
+    // åœæ­¢åŠ¨ç”»ï¼Œæš‚åœæ¸¸æˆ
     Director::getInstance()->stopAnimation();
 
-// ÒôÆµÒıÇæµ÷¿Ø
+// éŸ³é¢‘å¤„ç†
 #if USE_AUDIO_ENGINE
     AudioEngine::pauseAll();
 #endif
 }
 
-// µ±Ó¦ÓÃ³ÌĞòÖØĞÂ½øÈëÇ°Ì¨Ê±µ÷ÓÃ
+// å½“åº”ç”¨ç¨‹åºå³å°†è¿›å…¥å‰å°æ—¶è°ƒç”¨
 void AppDelegate::applicationWillEnterForeground() {
-    // »Ö¸´¶¯»­£¬¼ÌĞøÓÎÏ·
+    // æ¢å¤åŠ¨ç”»ï¼Œç»§ç»­æ¸¸æˆ
     Director::getInstance()->startAnimation();
 
-// ÒôÆµÒıÇæµ÷¿Ø
+// éŸ³é¢‘å¤„ç†
 #if USE_AUDIO_ENGINE
     AudioEngine::resumeAll();
 #endif

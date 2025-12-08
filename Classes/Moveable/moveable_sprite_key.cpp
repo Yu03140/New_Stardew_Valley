@@ -1,6 +1,6 @@
 #include "moveable_sprite_key.h"
 
-// ¾²Ì¬³ÉÔ±±äÁ¿¶¨Òå
+// ï¿½ï¿½Ì¬ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 std::string moveable_sprite_key::sprite_name = "";
 std::string moveable_sprite_key_walk::sprite_name_walk = "";
 std::string moveable_sprite_key_tool::sprite_name_tool = "";
@@ -11,30 +11,30 @@ std::unordered_set<std::string> TOOLS_MAP =
 { "Axe1", "Rod1", "Hoe1", "Pick1", "Can1" ,"Axe2", "Rod2", "Hoe2", "Pick2", "Can2" };
 
 
-//´´½¨Ò»¸ömoveable_sprite_keyµÄÊµÀý
+//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½moveable_sprite_keyï¿½ï¿½Êµï¿½ï¿½
 moveable_sprite_key* moveable_sprite_key::create(const std::string& plist_name, float width, float height)
 {
-    //¼ÓÔØplistÎÄ¼þ
+    //ï¿½ï¿½ï¿½ï¿½plistï¿½Ä¼ï¿½
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
 
-    //´´½¨ÊµÀý
+    //ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     moveable_sprite_key* sprite = new moveable_sprite_key();
 
-    // ´´½¨Í¸Ã÷µÄÄÚ´æ¿é£¬ÉèÖÃÎªÈ«Í¸Ã÷ (RGBA8888 ¸ñÊ½)
-    int dataSize = width * height * 4;  // Ã¿¸öÏñËØ 4 ×Ö½Ú£¨RGBA ¸ñÊ½£©
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½é£¬ï¿½ï¿½ï¿½ï¿½ÎªÈ«Í¸ï¿½ï¿½ (RGBA8888 ï¿½ï¿½Ê½)
+    int dataSize = width * height * 4;  // Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 4 ï¿½Ö½Ú£ï¿½RGBA ï¿½ï¿½Ê½ï¿½ï¿½
     unsigned char* transparentData = new unsigned char[dataSize];
 
-    // Ìî³äÍ¸Ã÷Êý¾Ý (Ã¿¸öÏñËØµÄ 4 ¸öÍ¨µÀÖµ¶¼Îª 0)
+    // ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ 4 ï¿½ï¿½Í¨ï¿½ï¿½Öµï¿½ï¿½Îª 0)
     memset(transparentData, 0, dataSize);
 
-    // ´´½¨Í¸Ã÷ÎÆÀí
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, width, height, cocos2d::Size(width, height));
     transparent_texture = transparentTexture;
 
-    // ÊÍ·ÅÄÚ´æ
+    // ï¿½Í·ï¿½ï¿½Ú´ï¿½
     delete[] transparentData;
-    //ÅÐ¶ÏÊÇ·ñÄÜ³É¹¦´´½¨
+    //ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½Ü³É¹ï¿½ï¿½ï¿½ï¿½ï¿½
     if (transparentTexture)
     {
         sprite->initWithTexture(transparentTexture);
@@ -48,45 +48,47 @@ moveable_sprite_key* moveable_sprite_key::create(const std::string& plist_name, 
     return nullptr;
 }
 
-//¼üÅÌ¼àÌýÆ÷
+//ï¿½ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ï¿½ï¿½
 void moveable_sprite_key::init_keyboardlistener()
 {
-    // ´´½¨¼üÅÌ¼àÌýÆ÷
+    // å…ˆç§»é™¤æ—§çš„ç›‘å¬å™¨ï¼Œé¿å…é‡å¤æ³¨å†Œ
+    _eventDispatcher->removeEventListenersForTarget(this);
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ï¿½ï¿½
     auto listener = cocos2d::EventListenerKeyboard::create();
 
-    // °´¼ü°´ÏÂÊ±µÄ»Øµ÷
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
     listener->onKeyPressed = CC_CALLBACK_2(moveable_sprite_key::onKeyPressed, this);
 
-    // °´¼üÊÍ·ÅÊ±µÄ»Øµ÷
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ê±ï¿½Ä»Øµï¿½
     listener->onKeyReleased = CC_CALLBACK_2(moveable_sprite_key::onKeyReleased, this);
 
-    // »ñÈ¡ÊÂ¼þ·Ö·¢Æ÷£¬Ìí¼Ó¼àÌýÆ÷
+    // ï¿½ï¿½È¡ï¿½Â¼ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½ï¿½ï¿½ï¿½
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
 }
 
-//°´ÏÂ¼üÅÌÊ±£¬½«¶ÔÓ¦·½Ïò²ÎÊýÐÞ¸ÄÎªtrue
+//ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸ï¿½Îªtrue
 void moveable_sprite_key::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event)
 {
     if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_UP_ARROW)
     {
-        movement[0] = true; // ÉÏ
+        movement[0] = true; // ï¿½ï¿½
     }
     else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_DOWN_ARROW)
     {
-        movement[1] = true; // ÏÂ
+        movement[1] = true; // ï¿½ï¿½
     }
     else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_LEFT_ARROW)
     {
-        movement[2] = true; // ×ó
+        movement[2] = true; // ï¿½ï¿½
     }
     else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_RIGHT_ARROW)
     {
-        movement[3] = true; // ÓÒ
+        movement[3] = true; // ï¿½ï¿½
     }
 }
 
-//ËÉ¿ª¼üÅÌºó£¬½«¶ÔÓ¦·½Ïò²ÎÊýÐÞ¸Ä»áfalse
+//ï¿½É¿ï¿½ï¿½ï¿½ï¿½Ìºó£¬½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸Ä»ï¿½false
 void moveable_sprite_key::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event)
 {
     if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_UP_ARROW)
@@ -106,22 +108,22 @@ void moveable_sprite_key::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode,
         movement[3] = false;
     }
 
-    // ËÉ¿ª¼üÅÌÊ±£¬Í£Ö¹ËùÓÐ¶¯×÷
+    // ï¿½É¿ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½
     this->stopAllActions();
     isAnimating = false;
 
 }
 
-//¸üÐÂÎ»ÖÃ
+//ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 void moveable_sprite_key::update(float deltaTime)
 {
-    //±£´æÊÇ·ñµ½´ï±ß½çµÄÅÐ¶Ï½á¹û,·Ö±ðÎªÉÏÏÂ×óÓÒ
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ñµ½´ï¿½ß½ï¿½ï¿½ï¿½Ð¶Ï½ï¿½ï¿½,ï¿½Ö±ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     bool is_hit_edge[4] = { false,false, false, false };
 
-    //»ñÈ¡¾«ÁéµÄÎ»ÖÃ
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
     sprite_pos = this->getPosition();
 
-    //»ñÈ¡´°¿ÚµÄ´óÐ¡ÐÅÏ¢
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ÚµÄ´ï¿½Ð¡ï¿½ï¿½Ï¢
     cocos2d::Size visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
     cocos2d::Vec2 origin = cocos2d::Director::getInstance()->getVisibleOrigin();
     if (sprite_pos.y + this->getContentSize().height * MapSize >= SceneHeight / 2 + visibleSize.height / 2) {
@@ -146,57 +148,62 @@ void moveable_sprite_key::update(float deltaTime)
             move_act(i);
     }
 
-    //»ñÈ¡¾«ÁéµÄÎ»ÖÃ
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
     sprite_pos = this->getPosition();
 }
 
-//Éú³ÉÒÆ¶¯Ö¸Áî
+//ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ö¸ï¿½ï¿½
 void moveable_sprite_key::move_act(int direction)
 {
-    //¸÷·½Ïò¶ÔÓ¦Í¼Æ¬ºó×º
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦Í¼Æ¬ï¿½ï¿½×º
     std::string dic[4] = { "-back","-front","-left","-right" };
     this->setSpriteFrame(sprite_name + dic[direction] + ".png");
-    //´´½¨ÒÆ¶¯¶¯×÷
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
     auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[direction], move_vecy[direction]));
     this->runAction(move_action);
 }
 
-// È·±£ÔÚ onEnter ÖÐÖØÐÂÌí¼Ó¼àÌýÆ÷
+// È·ï¿½ï¿½ï¿½ï¿½ onEnter ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½ï¿½ï¿½ï¿½
 void moveable_sprite_key::onEnter() {
-    Sprite::onEnter();  // ±£Ö¤»ùÀàµÄ onEnter ±»µ÷ÓÃ
-    init_keyboardlistener();  // ÖØÐÂ³õÊ¼»¯¼àÌýÆ÷
+    Sprite::onEnter();  // ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ onEnter ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    
+    // ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ÉµÄ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½×¢ï¿½ï¿½
+    //_eventDispatcher->removeEventListenersForTarget(this);
+    
+    // ï¿½ï¿½ï¿½Â³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    init_keyboardlistener();
 }
 
-// È·±£ÔÚ onExit ÖÐÒÆ³ý¼àÌýÆ÷
+// È·ï¿½ï¿½ï¿½ï¿½ onExit ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void moveable_sprite_key::onExit() {
-    _eventDispatcher->removeEventListenersForTarget(this);  // ÒÆ³ý¼àÌýÆ÷
-    Sprite::onExit();  // ±£Ö¤»ùÀàµÄ onExit ±»µ÷ÓÃ
+    _eventDispatcher->removeEventListenersForTarget(this);  // ï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    Sprite::onExit();  // ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ onExit ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
 
-//´´½¨moveable_sprite_key_walkÊµÀý
+//ï¿½ï¿½ï¿½ï¿½moveable_sprite_key_walkÊµï¿½ï¿½
 moveable_sprite_key_walk* moveable_sprite_key_walk::create(const std::string& plist_name, const std::string& sprite_framename)
 
 {
-    //¼ÓÔØplistÎÄ¼þ
+    //ï¿½ï¿½ï¿½ï¿½plistï¿½Ä¼ï¿½
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
 
-    //Í¬²½¾«ÁéµÄÍ¼¼¯Ãû³Æ
+    //Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     sprite_name_walk = sprite_framename;
 
-    //´´½¨ÊµÀý
+    //ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     std::string default_framename = sprite_name_walk + "-front.png";
     moveable_sprite_key_walk* sprite = new moveable_sprite_key_walk();
 
-    // »ñÈ¡Ö¸¶¨¾«ÁéÖ¡
+    // ï¿½ï¿½È¡Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡
     cocos2d::SpriteFrame* frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(default_framename);
 
-    //ÅÐ¶ÏÊÇ·ñÄÜ³É¹¦´´½¨
+    //ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½Ü³É¹ï¿½ï¿½ï¿½ï¿½ï¿½
     if (frame)
     {
         sprite->initWithSpriteFrame(frame);
         sprite->autorelease();
-        sprite->setScale(6.0f);  // ½«¾«Áé·Å´ó 6 ±¶
+        sprite->setScale(6.0f);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å´ï¿½ 6 ï¿½ï¿½
         sprite->init_keyboardlistener();
         CCLOG("Creation moveable_sprite_key_walk successfully!");
         return sprite;
@@ -206,31 +213,31 @@ moveable_sprite_key_walk* moveable_sprite_key_walk::create(const std::string& pl
     return nullptr;
 }
 
-//Éú³É´øÓÐÒÆ¶¯¶¯»­µÄÒÆ¶¯Ö¸Áî
+//ï¿½ï¿½ï¿½É´ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ö¸ï¿½ï¿½
 void moveable_sprite_key_walk::move_act(int direction)
 {
-    //¸÷·½Ïò¶ÔÓ¦Í¼Æ¬ºó×º
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦Í¼Æ¬ï¿½ï¿½×º
     std::string dic[4] = { "-back","-front","-left","-right" };
 
-    //´´½¨ÒÆ¶¯¶¯×÷
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
     auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[direction], move_vecy[direction]));
-    //´´½¨¶¯»­
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     cocos2d::Vector<cocos2d::SpriteFrame*> frames;
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + ".png"));
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + "2.png"));
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + "3.png"));
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + "4.png"));
-    // ´´½¨¶¯»­¶ÔÏó
-    auto animation = cocos2d::Animation::createWithSpriteFrames(frames, 0.1f); // Ã¿Ö¡¼ä¸ô 0.1s
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    auto animation = cocos2d::Animation::createWithSpriteFrames(frames, 0.1f); // Ã¿Ö¡ï¿½ï¿½ï¿½ 0.1s
     auto animate = cocos2d::Animate::create(animation);
     auto repeat = cocos2d::RepeatForever::create(animate);
 
     this->runAction(move_action);
-    // Èç¹û»¹Ã»ÓÐÔÚ²¥·Å¶¯»­£¬²Å¿ªÊ¼²¥·Å
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Ú²ï¿½ï¿½Å¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¿ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
     if (!isAnimating) {
-        // Ö´ÐÐÒÆ¶¯ºÍ¶¯»­
+        // Ö´ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½Í¶ï¿½ï¿½ï¿½
         this->runAction(repeat);
-        isAnimating = true;  // ±ê¼Ç¶¯»­ÕýÔÚ²¥·Å
+        isAnimating = true;  // ï¿½ï¿½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½
     }
 
     character_pos = this->getPosition();
@@ -247,33 +254,33 @@ cocos2d::Vec2 moveable_sprite_key_walk::get_pos()
 moveable_sprite_key_tool* moveable_sprite_key_tool::create(const std::string& plist_name)
 
 {
-    //¼ÓÔØplistÎÄ¼þ
+    //ï¿½ï¿½ï¿½ï¿½plistï¿½Ä¼ï¿½
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
 
-    //´´½¨ÊµÀý
+    //ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     moveable_sprite_key_tool* sprite = new moveable_sprite_key_tool();
 
-    // ´´½¨Í¸Ã÷µÄÄÚ´æ¿é£¬ÉèÖÃÎªÈ«Í¸Ã÷ (RGBA8888 ¸ñÊ½)
-    int dataSize = TOOL_HEIGHT * TOOL_WIDTH * 4;  // Ã¿¸öÏñËØ 4 ×Ö½Ú£¨RGBA ¸ñÊ½£©
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½é£¬ï¿½ï¿½ï¿½ï¿½ÎªÈ«Í¸ï¿½ï¿½ (RGBA8888 ï¿½ï¿½Ê½)
+    int dataSize = TOOL_HEIGHT * TOOL_WIDTH * 4;  // Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 4 ï¿½Ö½Ú£ï¿½RGBA ï¿½ï¿½Ê½ï¿½ï¿½
     unsigned char* transparentData = new unsigned char[dataSize];
 
-    // Ìî³äÍ¸Ã÷Êý¾Ý (Ã¿¸öÏñËØµÄ 4 ¸öÍ¨µÀÖµ¶¼Îª 0)
+    // ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ 4 ï¿½ï¿½Í¨ï¿½ï¿½Öµï¿½ï¿½Îª 0)
     memset(transparentData, 0, dataSize);
 
-    // ´´½¨Í¸Ã÷ÎÆÀí
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, TOOL_WIDTH, TOOL_HEIGHT, cocos2d::Size(TOOL_WIDTH, TOOL_HEIGHT));
     transparent_texture = transparentTexture;
 
-    // ÊÍ·ÅÄÚ´æ
+    // ï¿½Í·ï¿½ï¿½Ú´ï¿½
     delete[] transparentData;
 
-    //ÅÐ¶ÏÊÇ·ñÄÜ³É¹¦´´½¨
+    //ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½Ü³É¹ï¿½ï¿½ï¿½ï¿½ï¿½
     if (transparentTexture)
     {
         sprite->initWithTexture(transparentTexture);
         sprite->autorelease();
-        sprite->setScale(3.0f);  // ½«¾«Áé·Å´ó 3 ±¶
+        sprite->setScale(3.0f);  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å´ï¿½ 3 ï¿½ï¿½
         sprite->init_keyboardlistener();
         CCLOG("Creation moveable_sprite_key_tool successfully!");
         return sprite;
@@ -285,13 +292,13 @@ moveable_sprite_key_tool* moveable_sprite_key_tool::create(const std::string& pl
 
 void moveable_sprite_key_tool::update(float deltaTime) {
 
-    // ÏÈµ÷ÓÃ¸¸ÀàµÄ update
+    // ï¿½Èµï¿½ï¿½Ã¸ï¿½ï¿½ï¿½ï¿½ update
     moveable_sprite_key::update(deltaTime);
 
-    //Èç¹ûÊÖÉÏÏÖÔÚµÄ¹¤¾ßÓë±³°üÑ¡ÖÐµÄ²»Ò»ÖÂ£¬ÔòÐè¸üÐÂ
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÚµÄ¹ï¿½ï¿½ï¿½ï¿½ë±³ï¿½ï¿½Ñ¡ï¿½ÐµÄ²ï¿½Ò»ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     if (backpackLayer->getSelectedItem() != sprite_name_tool) {
         sprite_name_tool = backpackLayer->getSelectedItem();
-        //Èç¹û¸ÃÎïÆ·Îª¹¤¾ß£¬ÔòÐèÒªËæ·½Ïòµ÷Õû
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·Îªï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½æ·½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (sprite_name_tool != "") {
             if (TOOLS_MAP.count(backpackLayer->getSelectedItem())) {
                 this->setSpriteFrame(sprite_name_tool + direc + ".png");
@@ -305,37 +312,46 @@ void moveable_sprite_key_tool::update(float deltaTime) {
     }
 }
 
-//Éú³ÉÒÆ¶¯Ö¸Áî
+//ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ö¸ï¿½ï¿½
 void moveable_sprite_key_tool::move_act(int direction)
 {
     std::string dic[4] = { "-back","-front","-left","-right" };
     if (sprite_name_tool != "") {
         if (TOOLS_MAP.count(backpackLayer->getSelectedItem())) {
-            //¸÷·½Ïò¶ÔÓ¦Í¼Æ¬ºó×º
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦Í¼Æ¬ï¿½ï¿½×º
             this->setSpriteFrame(sprite_name_tool + dic[direction] + ".png");
         }
     }
     direc = dic[direction];
 
-    //´´½¨ÒÆ¶¯¶¯×÷
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
     auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[direction], move_vecy[direction]));
     this->runAction(move_action);
 }
 
-// ³õÊ¼»¯Êó±ê¼àÌýÆ÷
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void moveable_sprite_key_tool::init_mouselistener()
 {
-    // ´´½¨Êó±ê¼àÌýÆ÷
+
+    //// å…ˆç§»é™¤æ—§çš„é¼ æ ‡ç›‘å¬å™¨ï¼Œé¿å…é‡å¤æ³¨å†Œ
+    //auto listeners = _eventDispatcher->getListeners(this);
+    //for (auto& listener : listeners) {
+    //    if (listener->getType() == cocos2d::EventListener::Type::MOUSE) {
+    //        _eventDispatcher->removeEventListener(listener);
+    //    }
+    //}
+
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     auto listener = cocos2d::EventListenerMouse::create();
 
-    // Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+    // ï¿½ï¿½ê°´ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
     listener->onMouseDown = CC_CALLBACK_1(moveable_sprite_key_tool::on_mouse_click, this);
 
-    // »ñÈ¡ÊÂ¼þ·Ö·¢Æ÷£¬Ìí¼Ó¼àÌýÆ÷
+    // ï¿½ï¿½È¡ï¿½Â¼ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½ï¿½ï¿½ï¿½
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
-// Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+// ï¿½ï¿½ê°´ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
 void moveable_sprite_key_tool::on_mouse_click(cocos2d::Event* event)
 {
     
@@ -360,10 +376,10 @@ void moveable_sprite_key_tool::on_mouse_click(cocos2d::Event* event)
         CCLOG("IN CONTROL");
         if (TOOLS_MAP.count(sprite_name_tool)) {
             CCLOG("tool click!");
-            // ÇÐ»»ÎÆÀí
+            // ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½
             this->setSpriteFrame(sprite_name_tool + direc + "-clicked.png");
 
-            // ÔÚ 0.2 Ãëºó»Ö¸´Ô­Í¼
+            // ï¿½ï¿½ 0.2 ï¿½ï¿½ï¿½Ö¸ï¿½Ô­Í¼
             this->scheduleOnce([this](float dt) {
                 if (sprite_name_tool != "")
                     this->setSpriteFrame(sprite_name_tool + direc + ".png");
