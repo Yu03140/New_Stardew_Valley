@@ -5,7 +5,7 @@
 !.gitignore
 
 # 3. 不要忽略 class 文件夹
-!class/
+!classes/
 
 # 4. 不要忽略 class 文件夹下的所有内容
-!class/**
+!classes/**
