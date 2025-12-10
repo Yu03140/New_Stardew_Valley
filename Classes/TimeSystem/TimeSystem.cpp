@@ -102,22 +102,22 @@ void TimeSystem::randomWeather() {
 
 
 
-void TimeSystem::checkForHoliday() {
-    // 如果已经进入过圣诞场景，不再触发
-    if (hasEnteredChristmasScene) {
-        return;
-    }
-
-    // 检查时间条件
-    if (year == 2024 && season == 1 && day == 1 && hour == 5) {
-        // 设置标志为 true，防止再次触发
-        hasEnteredChristmasScene = true;
-
-        // 切换到圣诞场景
-        auto christmasScene = ChristmasScene::createScene();
-        cocos2d::Director::getInstance()->pushScene(christmasScene);
-    }
-}
+//void TimeSystem::checkForHoliday() {
+//    // 如果已经进入过圣诞场景，不再触发
+//    if (hasEnteredChristmasScene) {
+//        return;
+//    }
+//
+//    // 检查时间条件
+//    if (year == 2024 && season == 1 && day == 1 && hour == 5) {
+//        // 设置标志为 true，防止再次触发
+//        hasEnteredChristmasScene = true;
+//
+//        // 切换到圣诞场景
+//        auto christmasScene = ChristmasScene::createScene();
+//        cocos2d::Director::getInstance()->pushScene(christmasScene);
+//    }
+//}
 
 // 夜晚转场动画，每天晚上转换到第二天时触发
 void TimeSystem::triggerNightTransition() {

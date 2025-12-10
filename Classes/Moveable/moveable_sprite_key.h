@@ -12,8 +12,8 @@
 class moveable_sprite_key : public cocos2d::Sprite
 {
 protected:
-    const float speed = SPEED;//ÒÆ¶¯ËÙ¶È
-    //Êı×é¸÷Î»ÖÃ·Ö±ğ±íÊ¾ÉÏ¡¢ÏÂ¡¢×ó¡¢ÓÒ·½Î»
+    const float speed = SPEED;//ï¿½Æ¶ï¿½ï¿½Ù¶ï¿½
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã·Ö±ï¿½ï¿½Ê¾ï¿½Ï¡ï¿½ï¿½Â¡ï¿½ï¿½ï¿½ï¿½Ò·ï¿½Î»
     float move_vecx[4] = { 0,0,-speed * 0.1f,speed * 0.1f };
     float move_vecy[4] = { speed * 0.1f,-speed * 0.1f ,0,0 };
     bool movement[4] = { false, false, false, false };
@@ -26,28 +26,28 @@ private:
 public:
     virtual ~moveable_sprite_key() { CCLOG("~moveable_sprite_key"); }
 
-    //´´½¨Ò»¸ömoveable_sprite_keyµÄÊµÀı
+    //ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½moveable_sprite_keyï¿½ï¿½Êµï¿½ï¿½
     static moveable_sprite_key* create(const std::string& plist_name, float width, float height);
 
-    //¼üÅÌ¼àÌıÆ÷
+    //ï¿½ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ï¿½ï¿½
     virtual void init_keyboardlistener();
 
-    //°´ÏÂ¼üÅÌÊ±£¬½«¶ÔÓ¦·½Ïò²ÎÊıĞŞ¸ÄÎªtrue
+    //ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ş¸ï¿½Îªtrue
     void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
 
-    //ËÉ¿ª¼üÅÌºó£¬½«¶ÔÓ¦·½Ïò²ÎÊıĞŞ¸Ä»áfalse
+    //ï¿½É¿ï¿½ï¿½ï¿½ï¿½Ìºó£¬½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ş¸Ä»ï¿½false
     void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
 
-    //¸üĞÂÎ»ÖÃ
+    //ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
     void update(float deltaTime);
 
-    //Éú³ÉÒÆ¶¯Ö¸Áî
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ö¸ï¿½ï¿½
     virtual void move_act(int direction);
 
-    // È·±£ÔÚ onEnter ÖĞÖØĞÂÌí¼Ó¼àÌıÆ÷
+    // È·ï¿½ï¿½ï¿½ï¿½ onEnter ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½ï¿½ï¿½ï¿½
     void onEnter();
 
-    // È·±£ÔÚ onExit ÖĞÒÆ³ı¼àÌıÆ÷
+    // È·ï¿½ï¿½ï¿½ï¿½ onExit ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void onExit();
 };
 
@@ -56,26 +56,34 @@ class moveable_sprite_key_walk : public moveable_sprite_key
 private:
     static std::string sprite_name_walk;
     static cocos2d::Texture2D* transparent_texture;
+    cocos2d::Vec2 targetPosition;  // ç›®æ ‡ä½ç½®
+    bool hasTarget = false;  // æ˜¯å¦æœ‰ç›®æ ‡ä½ç½®
 
 public:
     ~moveable_sprite_key_walk() { CCLOG("~moveable_sprite_key_walk"); }
 
-    //´´½¨Ò»¸ömoveable_sprite_keyµÄÊµÀı
+    //ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½moveable_sprite_keyï¿½ï¿½Êµï¿½ï¿½
     static moveable_sprite_key_walk* create(const std::string& plist_name, const std::string& sprite_framename);
 
-    //Éú³É´øÓĞÒÆ¶¯¶¯»­µÄÒÆ¶¯Ö¸Áî
+    //ï¿½ï¿½ï¿½É´ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ö¸ï¿½ï¿½
     void move_act(int direction) override;
 
     cocos2d::Vec2 get_pos();
+    
+    // ç§»åŠ¨åˆ°ç›®æ ‡ä½ç½®
+    void moveToPosition(const cocos2d::Vec2& targetPosition);
+    
+    // é‡å†™updateæ–¹æ³•ï¼Œæ·»åŠ è‡ªåŠ¨ç§»åŠ¨åˆ°ç›®æ ‡ä½ç½®çš„é€»è¾‘
+    void update(float deltaTime) override;
 
     void moveable_sprite_key_walk::onEnter() {
-        moveable_sprite_key::onEnter();  // µ÷ÓÃ»ùÀàµÄ onEnter
-        // ×ÓÀàµÄÆäËû³õÊ¼»¯Âß¼­
+        moveable_sprite_key::onEnter();  // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ onEnter
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ß¼ï¿½
     }
 
     void moveable_sprite_key_walk::onExit() {
-        moveable_sprite_key::onExit();  // µ÷ÓÃ»ùÀàµÄ onExit
-        // ×ÓÀàµÄÆäËûÇåÀíÂß¼­
+        moveable_sprite_key::onExit();  // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ onExit
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½
     }
 };
 
@@ -89,16 +97,16 @@ private:
 public:
     ~moveable_sprite_key_tool() { CCLOG("~moveable_sprite_key_tool"); }
 
-    //´´½¨Ò»¸ömoveable_sprite_key_toolµÄÊµÀı
+    //ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½moveable_sprite_key_toolï¿½ï¿½Êµï¿½ï¿½
     static moveable_sprite_key_tool* create(const std::string& plist_name);
 
-    //Éú³ÉÒÆ¶¯Ö¸Áî
+    //ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ö¸ï¿½ï¿½
     void moveable_sprite_key_tool::move_act(int direction) override;
 
-    // ³õÊ¼»¯Êó±ê¼àÌıÆ÷
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void init_mouselistener();
 
-    // Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+    // ï¿½ï¿½ê°´ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
     void on_mouse_click(cocos2d::Event* event);
 
     void update(float deltaTime) override;

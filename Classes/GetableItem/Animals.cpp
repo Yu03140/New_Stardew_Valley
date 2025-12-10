@@ -9,15 +9,15 @@ animals::animals()
     ID = ++count;
 }
 
-// ±£´æ»ù±¾ÐÅÏ¢
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 void animals::set_info(std::string name, cocos2d::Vec2 pos, cocos2d::Size size)
 {
-    // ÉèÖÃ»ù±¾ÐÅÏ¢
+    // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
     animals_name = name;
     produce_size = size;
     produce_pos = pos;
     produce_day = ANIMAL_MAP.at(animals_name);
-    // ´´½¨Í¸Ã÷µÄÄÚ´æ¿é
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½
     int dataSize = size.width * size.height * 4; 
     unsigned char* transparentData = new unsigned char[dataSize];
     memset(transparentData, 0, dataSize);
@@ -25,11 +25,11 @@ void animals::set_info(std::string name, cocos2d::Vec2 pos, cocos2d::Size size)
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, size.width, size.height, size);
     transparent_texture = transparentTexture;
 
-    // ÊÍ·ÅÄÚ´æ
+    // ï¿½Í·ï¿½ï¿½Ú´ï¿½
     delete[] transparentData;
 }
 
-// ´´½¨ÊµÀý
+// ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
 animals* animals::create(const std::string& plist_name)
 {
 
@@ -48,7 +48,7 @@ animals* animals::create(const std::string& plist_name)
     return nullptr;
 }
 
-// Í¼Æ¬Éú³É
+// Í¼Æ¬ï¿½ï¿½ï¿½ï¿½
 void animals::set_imag()
 {
     if (produce && transparent_texture) {
@@ -59,7 +59,7 @@ void animals::set_imag()
     }
 }
 
-// ³õÊ¼»¯Êó±ê¼àÌýÆ÷
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void animals::init_mouselistener()
 {
     auto listener = cocos2d::EventListenerMouse::create();
@@ -67,21 +67,39 @@ void animals::init_mouselistener()
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
-// Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+// ï¿½ï¿½ê°´ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
 void animals::on_mouse_click(cocos2d::Event* event)
 {
     auto mouse_event = dynamic_cast<cocos2d::EventMouse*>(event);
+    if (!mouse_event) return;
+    
+    // åªå“åº”å³é”®ç‚¹å‡»
+    if (mouse_event->getMouseButton() != cocos2d::EventMouse::MouseButton::BUTTON_RIGHT) {
+        return;
+    }
+    
     auto mouse_pos = this->getParent()->convertToNodeSpace(mouse_event->getLocationInView());
     auto animals_pos = this->getPosition();
     auto animals_size = this->getContentSize();
-    if (is_in_control) {
+    
+    // éžå†œåœºåœºæ™¯ä¸éœ€è¦is_in_controlæ£€æŸ¥ï¼Œå†œåœºåœºæ™¯éœ€è¦
+    bool canCheckClick = false;
+    if (!is_infarm) {
+        // éžå†œåœºåœºæ™¯ï¼šç›´æŽ¥å¯ä»¥ç‚¹å‡»ï¼Œä¸éœ€è¦is_in_control
+        canCheckClick = true;
+    } else {
+        // å†œåœºåœºæ™¯ï¼šéœ€è¦is_in_control
+        canCheckClick = is_in_control;
+    }
+    
+    if (canCheckClick) {
         if (mouse_pos.x > animals_pos.x - 5 &&
             mouse_pos.x < animals_pos.x + animals_size.width + 5 &&
             mouse_pos.y > animals_pos.y - 5 &&
             mouse_pos.y < animals_pos.y + animals_size.height + 5)
         {
             CCLOG("animals clicked");
-            if (backpackLayer->getSelectedItem() == FOOD) {
+            if (backpackLayer && backpackLayer->getSelectedItem() == FOOD) {
                 this->feed();
             }
         }
@@ -101,7 +119,7 @@ void animals::on_mouse_click(cocos2d::Event* event)
     }
 }
 
-// Î¹Ñø
+// Î¹ï¿½ï¿½
 void animals::feed()
 {
     if (feed_today) {
@@ -113,21 +131,21 @@ void animals::feed()
         CCLOG("couldn't feed today");
 }
 
-// Éú³É¸½ÊôÆ·
+// ï¿½ï¿½ï¿½É¸ï¿½ï¿½ï¿½Æ·
 void animals::create_produce()
 {
     if (feed_count % produce_day == 0 && feed_count)
     {
-        produce->setSpriteFrame(animals_name + "-produce.png");//ÏÔÊ¾Éú³ÉÎï
+        produce->setSpriteFrame(animals_name + "-produce.png");//ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         is_produce = 1;
         CCLOG("create produce");
     }
 }
 
-// ÊÕ»ñ¹¦ÄÜ
+// ï¿½Õ»ï¿½ï¿½ï¿½
 void animals::harvest()
 {
-    //°ÑÉú³ÉÎï¼ÓÈë±³°ü,²¢»ñµÃ¾­ÑéÖµ
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë±³ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½Ã¾ï¿½ï¿½ï¿½Öµ
     backpackLayer->addItem(PRODUCE_MAP.at(animals_name));
     Player* player = Player::getInstance("me");
     player->playerproperty.addExperience(EXPERIENCE);
@@ -136,44 +154,44 @@ void animals::harvest()
 }
 
 
-// ÓÎµ´
+// ï¿½Îµï¿½
 void animals::randmove(cocos2d::TMXTiledMap* tileMap)
 {
     unsigned int timestamp = static_cast<unsigned int>(time(0)) * 1000 + static_cast<unsigned int>(clock()) / (CLOCKS_PER_SEC / 1000);
 
-    // »ñÈ¡½ø³ÌID£¨½ø³Ì¼äµÄ²îÒì£©
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½ï¿½Ì¼ï¿½Ä²ï¿½ï¿½ì£©
     unsigned int pid = static_cast<unsigned int>(getpid());
 
-    // »ñÈ¡Ïß³ÌID£¨Èç¹ûÓÐ¶àÏß³Ì£©
+    // ï¿½ï¿½È¡ï¿½ß³ï¿½IDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ß³Ì£ï¿½
     unsigned int tid = static_cast<unsigned int>(std::hash<std::thread::id>{}(std::this_thread::get_id()));
 
-    // ½áºÏÊ±¼ä´Á¡¢½ø³ÌID¡¢Ïß³ÌIDÀ´Éú³ÉÒ»¸ö¸´ÔÓµÄÖÖ×Ó
+    // ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½IDï¿½ï¿½ï¿½ß³ï¿½IDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½
     unsigned int seed = timestamp ^ pid ^ tid;
 
     srand(seed + ID);
     dic = (rand() % rand() + ID) % 4;
     movement[dic] = 1;
 
-    // ¶¨Ê±µ÷ÓÃ move_act£¬Ã¿Ãëµ÷ÓÃÒ»´Î
+    // ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ move_actï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
     this->schedule([this, tileMap](float) {
         move_act(tileMap);
         }, 0.1f, "move_act_key");  
 
-    // 2ÃëºóÖ´ÐÐ»Øµ÷º¯ÊýÒ»´Î
+    // 2ï¿½ï¿½ï¿½Ö´ï¿½Ð»Øµï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
     this->scheduleOnce([this](float dt) {
         movement[dic] = 0;
         }, 2.0f, "one_time_schedule");
 
 }
 
-// ÒÆ¶¯¶¯×÷
+// ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
 void animals::move_act(cocos2d::TMXTiledMap* tileMap)
 {
     for (int i = 0; i < 4; i++) {
         is_hit_edge[i] = false;
     }
 
-    //»ñÈ¡¾«ÁéµÄÎ»ÖÃ
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
     auto sprite_pos = this->getPosition();
     cocos2d::Size spriteSize = this->getContentSize();
     cocos2d::Size mapSize = tileMap->getMapSize();
@@ -182,7 +200,7 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
     mapSize.height *= tileSize.height;
     cocos2d::Vec2 origin = cocos2d::Director::getInstance()->getVisibleOrigin();
 
-    // ÅÐ¶Ï¾«ÁéÊÇ·ñ³¬³ö±ß½ç
+    // ï¿½Ð¶Ï¾ï¿½ï¿½ï¿½ï¿½Ç·ñ³¬³ï¿½ï¿½ß½ï¿½
     if (sprite_pos.y + spriteSize.height / 2 >= mapSize.height - EDGE1) {
         is_hit_edge[0] = true;
         //CCLOG("Sprite hit the top edge");
@@ -201,7 +219,7 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
     }
     for (int i = 0; i < 4; i++) {
         if (movement[i] && !is_hit_edge[i]) {
-            //´´½¨ÒÆ¶¯¶¯×÷
+            //ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½
             std::string dic[4] = { "-back","-front","-left","-right" };
             this->setSpriteFrame(animals_name + dic[i] + ".png");
             auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[i], move_vecy[i]));
@@ -215,26 +233,26 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
 
 }
 
-// ²»¶¨Ê±ÓÎµ´
+// ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Îµï¿½
 void animals::scheduleRandomMove(cocos2d::TMXTiledMap* tileMap) {
 
-    // Ã¿5ÃëËæ»úÒÆ¶¯Ò»´Î
+    // Ã¿5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Ò»ï¿½ï¿½
     this->schedule([this, tileMap](float dt) {
         randmove(tileMap);
         }, 5.0f, "random_move_key");
 
 }
 
-// ÐÂÒ»ÌìµÄ¸üÐÂ
+// ï¿½ï¿½Ò»ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½
 void animals::update_day(float deltaTime)
 {
-    if (timeSystem->getDay() != now_day)//½ñÌì½áÊøÁË
+    if (timeSystem->getDay() != now_day)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
         if (animals_name != "") {
-            if (feed_today == 0)//ËµÃ÷½ñÌìÎ¹Ñø´ÎÊý´ïµ½ÒªÇó
+            if (feed_today == 0)//Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ïµ½Òªï¿½ï¿½
             {
                 feed_count++;
-                //²é¿´ÊÇ·ñÐèÒª¸üÐÂ³É³¤×´Ì¬
+                //ï¿½é¿´ï¿½Ç·ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Â³É³ï¿½×´Ì¬
                 this->create_produce();
             }
         }
@@ -257,17 +275,17 @@ AnimalsManager* AnimalsManager::create()
         return nullptr;
     }
 }
-// Ìí¼Ó¾«Áéµ½ÈÝÆ÷
+// ï¿½ï¿½ï¿½Ó¾ï¿½ï¿½éµ½ï¿½ï¿½ï¿½ï¿½
 void AnimalsManager::add_animals(animals* sprite) {
     animals_list.push_back(sprite);
 }
 
 void AnimalsManager::schedule_animals()
 {
-    // µü´úÆ÷±éÀú·ÃÎÊ¾«Áé
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½
     for (auto it = animals_list.begin(); it != animals_list.end(); ++it) {
-        auto animal = *it;                      // »ñÈ¡Ö¸Õë£¬Ö¸Ïò¾«Áé
-        animal->schedule([animal](float dt) {   // ²¶»ñÖ¸Õë animal
+        auto animal = *it;                      // ï¿½ï¿½È¡Ö¸ï¿½ë£¬Ö¸ï¿½ï¿½ï¿½ï¿½
+        animal->schedule([animal](float dt) {   // ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ animal
             animal->update(dt); 
             }, "update_animal");
     }

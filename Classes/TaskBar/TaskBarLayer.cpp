@@ -1,22 +1,22 @@
 #include "TaskBarLayer.h"
 #include "Global/Global.h"
-#include "Scene/Farmground.h"
+// ä¸å†éœ€è¦åŒ…å«Sceneæ–‡ä»¶å¤¹ä¸‹çš„å¤´æ–‡ä»¶
 
 cocos2d::Scene* TaskBarLayer::createScene() {
-    auto scene = cocos2d::Scene::create(); // ´´½¨Ò»¸öÐÂ³¡¾°
-    auto layer = TaskBarLayer::create();  // ´´½¨ÈÎÎñÀ¸²ã
-    scene->addChild(layer); // ½«ÈÎÎñÀ¸²ãÌí¼Óµ½³¡¾°ÖÐ
-    return scene; // ·µ»Ø³¡¾°
+    auto scene = cocos2d::Scene::create(); // ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Â³ï¿½ï¿½ï¿½
+    auto layer = TaskBarLayer::create();  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    scene->addChild(layer); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    return scene; // ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½
 }
 
 bool TaskBarLayer::init() {
-    if (!Layer::init()) { // µ÷ÓÃ¸¸Àà³õÊ¼»¯·½·¨
-        return false; // Èç¹ûÊ§°Ü£¬Ôò·µ»Ø false
+    if (!Layer::init()) { // ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        return false; // ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½ï¿½ò·µ»ï¿½ false
     }
 
-    // ´´½¨ TaskBar
+    // ï¿½ï¿½ï¿½ï¿½ TaskBar
     taskBar = TaskBar::create();
-    //µÚÒ»¸ö
+    //ï¿½ï¿½Ò»ï¿½ï¿½
     taskBar->addTask("Collect one strawberry\nfor Fizzer.", [this]() {
         if (backpackLayer->removeItem("strawberry", 1)) {
             auto player = Player::getInstance();
@@ -24,8 +24,8 @@ bool TaskBarLayer::init() {
             player->playerproperty.addMoney(50);
             cocos2d::log("First task completed: 50 XP and 50$ added.");
 
-            // ±ê¼ÇÈÎÎñÍê³É
-            taskBar->taskCompleted = true; // ÏÔÊ½ÉèÖÃÈÎÎñÍê³É±êÖ¾
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            taskBar->taskCompleted = true; // ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É±ï¿½Ö¾
         }
         else {
             cocos2d::log("Failed to complete the first task: Strawberry not found!");
@@ -39,39 +39,39 @@ bool TaskBarLayer::init() {
             player->playerproperty.addExperience(50);
             player->playerproperty.addMoney(50);
 
-            this->taskBar->taskCompleted = true; // Ê¹ÓÃ this ²¶»ñºó·ÃÎÊ³ÉÔ±±äÁ¿
+            this->taskBar->taskCompleted = true; // Ê¹ï¿½ï¿½ this ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê³ï¿½Ô±ï¿½ï¿½ï¿½ï¿½
             cocos2d::log("Second task completed: 50 XP and 50$ added.");
         }
 
         });
 
 
-    // ÉèÖÃÈÎÎñÀ¸µ½ÆÁÄ»ÖÐÐÄ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½
     auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
     taskBar->setAnchorPoint(Vec2(0.5, 0.5));
     taskBar->setPosition(cocos2d::Vec2(visibleSize.width / 2 - visibleSize.width * (0.1), visibleSize.height / 2 - visibleSize.height * (0.05)));
-    taskBar->setVisible(false); // ³õÊ¼²»¿É¼û
+    taskBar->setVisible(false); // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½É¼ï¿½
     taskBar->setScale(4.0);
-    this->addChild(taskBar, 2); // ½«ÈÎÎñÀ¸Ìí¼Óµ½µ±Ç°²ãÖÐ
+    this->addChild(taskBar, 2); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
 
-    // ´´½¨°´Å¥£¬ÓÃÓÚÏÔÊ¾ÈÎÎñÀ¸
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     auto showTaskBarButton = cocos2d::MenuItemImage::create(
-        "TaskBarOrigin.png", // °´Å¥µÄÕý³£×´Ì¬Í¼Ïñ
-        "TaskBarOrigin.png", // °´Å¥µÄÑ¡ÖÐ×´Ì¬Í¼Ïñ
-        [this](Ref* sender) { // Ê¹ÓÃ [this] ²¶»ñµ±Ç°ÀàÊµÀýÖ¸Õë
-            this->taskBar->show(); // ÏÔÊ¾ÈÎÎñÀ¸
+        "TaskBarOrigin.png", // ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬Í¼ï¿½ï¿½
+        "TaskBarOrigin.png", // ï¿½ï¿½Å¥ï¿½ï¿½Ñ¡ï¿½ï¿½×´Ì¬Í¼ï¿½ï¿½
+        [this](Ref* sender) { // Ê¹ï¿½ï¿½ [this] ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Êµï¿½ï¿½Ö¸ï¿½ï¿½
+            this->taskBar->show(); // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         });
 
     showTaskBarButton->setScale(1.5);
-    showTaskBarButton->setPosition(cocos2d::Vec2(visibleSize.width * 0.72, visibleSize.height * 0.6)); // ÉèÖÃ°´Å¥Î»ÖÃ
-    showTaskBarButton->setOpacity(255); // ÉèÖÃÍêÈ«²»Í¸Ã÷
+    showTaskBarButton->setPosition(cocos2d::Vec2(visibleSize.width * 0.72, visibleSize.height * 0.6)); // ï¿½ï¿½ï¿½Ã°ï¿½Å¥Î»ï¿½ï¿½
+    showTaskBarButton->setOpacity(255); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½Í¸ï¿½ï¿½
 
 
-    // ´´½¨²Ëµ¥²¢½«°´Å¥Ìí¼Óµ½²Ëµ¥ÖÐ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½Óµï¿½ï¿½Ëµï¿½ï¿½ï¿½
     auto menu = cocos2d::Menu::create(showTaskBarButton, nullptr);
-    menu->setPosition(cocos2d::Vec2::ZERO + Vec2(visibleSize.width * (-0.01), visibleSize.width * (-0.05))); // ÉèÖÃ²Ëµ¥Î»ÖÃÎªÔ­µã
+    menu->setPosition(cocos2d::Vec2::ZERO + Vec2(visibleSize.width * (-0.01), visibleSize.width * (-0.05))); // ï¿½ï¿½ï¿½Ã²Ëµï¿½Î»ï¿½ï¿½ÎªÔ­ï¿½ï¿½
     menu->setScale(1.5);
-    this->addChild(menu, 2); // ½«²Ëµ¥Ìí¼Óµ½µ±Ç°²ãÖÐ
+    this->addChild(menu, 2); // ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
 
-    return true; // ³õÊ¼»¯³É¹¦
+    return true; // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½É¹ï¿½
 }

@@ -1,6 +1,6 @@
 #include "BackpackLayer.h"
 #include "cocos2d.h"
-#include "Scene/FarmGround.h"
+// ä¸å†éœ€è¦åŒ…å«Sceneæ–‡ä»¶å¤¹ä¸‹çš„å¤´æ–‡ä»¶
 
 USING_NS_CC;
 
@@ -14,7 +14,7 @@ BackpackLayer::~BackpackLayer() {
     CCLOG("BackpackLayer destroy"); 
 }
 
-// ´´½¨±³°ü½çÃæ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 BackpackLayer* BackpackLayer::create() {
     BackpackLayer* ret = new BackpackLayer();
     if (ret && ret->init()) {
@@ -37,7 +37,7 @@ BackpackLayer* BackpackLayer::getInstance() {
     return instance;
 }
 
-// Ïú»ÙÊµÀı
+// ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
 void BackpackLayer::destroyInstance() {
     if (instance) {
         instance->removeFromParent();
@@ -46,13 +46,13 @@ void BackpackLayer::destroyInstance() {
 }
 
 
-// ³õÊ¼»¯º¯Êı
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 bool BackpackLayer::init() {
     if (!Layer::init()) {
         return false;
     }
 
-    // »ñÈ¡ÍßÆ¬µØÍ¼±³¾°
+    // ï¿½ï¿½È¡ï¿½ï¿½Æ¬ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
     auto visibleSize = Director::getInstance()->getVisibleSize();
     tilemap = TMXTiledMap::create("backpack_map.tmx");  
     if (!tilemap) {
@@ -63,32 +63,32 @@ bool BackpackLayer::init() {
     this->addChild(tilemap, 0);
     auto mapSize = tilemap->getContentSize();
 
-    // ÉèÖÃÍßÆ¬µØÍ¼Î»ÖÃ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½Í¼Î»ï¿½ï¿½
     X0 = (visibleSize.width - mapSize.width) / 2;  
     Y0 = visibleSize.height * 0.05f;              
     tilemap->setPosition(Vec2(X0, Y0));
 
-    // »ñÈ¡¶ÔÏó²ã£¨Ã¿¸ö±³°ü¸ñ×ÓµÄÎ»ÖÃ£©
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ã£¨Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½Î»ï¿½Ã£ï¿½
     auto objectGroup = tilemap->getObjectGroup("Slots");  
     if (!objectGroup) {
         CCLOG("Failed to get object group 'Slots'");
         return false;
     }
 
-    // ±³°ü¸ñ×Ó¹ÜÀí£¨¼ÙÉè×î´ó12¸ñ£©
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½12ï¿½ï¿½
     itemSlots.resize(12);
     for (int i = 0; i < 12; ++i) {
-        itemSlots[i].name = "";      // ÎïÆ·Ãû
-        itemSlots[i].quantity = 0;   // ÎïÆ·ÊıÁ¿
+        itemSlots[i].name = "";      // ï¿½ï¿½Æ·ï¿½ï¿½
+        itemSlots[i].quantity = 0;   // ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
 
-        // »ñÈ¡¶ÔÏó²ãÖĞÃ¿¸ö¸ñ×ÓµÄ×ø±ê
+        // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½
         auto object = objectGroup->getObject("Slot" + std::to_string(i + 1));  
         float posX = object["x"].asFloat();
         float posY = object["y"].asFloat();
         float width = object["width"].asFloat();
         float height = object["height"].asFloat();
 
-        // ´´½¨Í¸Ã÷ÎÆÀíµÄ¾«Áé
+        // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½
         auto sprite = Sprite::create();                                              
 		sprite->setPosition(Vec2(posX, posY));                                    
 		sprite->setAnchorPoint(Vec2(0, 0));                                       
@@ -97,9 +97,9 @@ bool BackpackLayer::init() {
         itemSlots[i].sprite = sprite;
     }
 
-    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("bag.plist");        //´«Èë±³°üÎÆÀíÍ¼¼¯
+    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("bag.plist");        //ï¿½ï¿½ï¿½ë±³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½
 
-	// ³õÊ¼Ìí¼ÓÎïÆ·
+	// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·
     addItem("Axe1");
     addItem("Can1");
     addItem("Hoe1");
@@ -113,25 +113,28 @@ bool BackpackLayer::init() {
 	addItem("fertilizer1",5);
 
 
-    // Ìí¼Óµã»÷ÊÂ¼ş¼àÌıÆ÷
+    // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    // æ·»åŠ é¼ æ ‡äº‹ä»¶ç›‘å¬å™¨
+    // ä½¿ç”¨å›ºå®šä¼˜å…ˆçº§10ï¼Œç¡®ä¿èƒŒåŒ…å±‚çš„ç‚¹å‡»äº‹ä»¶ä¼˜å…ˆå¤„ç†ï¼ˆé«˜äºåœºæ™¯çš„é¼ æ ‡ç›‘å¬å™¨ä¼˜å…ˆçº§0ï¼‰
+    // è¿™æ ·èƒŒåŒ…å±‚çš„å·¥å…·é€‰æ‹©åŠŸèƒ½èƒ½æ­£å¸¸å·¥ä½œ
     auto listener = EventListenerMouse::create();
     listener->onMouseDown = CC_CALLBACK_1(BackpackLayer::onMouseDown, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+    _eventDispatcher->addEventListenerWithFixedPriority(listener, 10);
 
     return true;
 }
 
-// Êó±êµã»÷ÊÂ¼ş´¦Àíº¯Êı
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void BackpackLayer::onMouseDown(Event* event) {
     EventMouse* mouseEvent = static_cast<EventMouse*>(event);
-    Vec2 clickPosition = mouseEvent->getLocation();  // »ñÈ¡Êó±êµã»÷Î»ÖÃ
+    Vec2 clickPosition = mouseEvent->getLocation();  // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 
-	// »ñµÃÊó±êµÄTiled×ø±ê
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Tiledï¿½ï¿½ï¿½ï¿½
     auto visibleSize = Director::getInstance()->getVisibleSize();
     float visibleHeight = visibleSize.height;
     clickPosition.y = visibleHeight - clickPosition.y; 
 
-    // ±éÀúÃ¿¸ö±³°ü¸ñ×Ó£¬¼ì²éÊÇ·ñµã»÷ÁËÎïÆ·
+    // ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·
     for (int i = 0; i < itemSlots.size(); ++i) {
         auto& slot = itemSlots[i];
         Rect slotRect(slot.sprite->getPositionX() + X0, slot.sprite->getPositionY() + Y0 - slot.sprite->getContentSize().height,
@@ -145,11 +148,17 @@ void BackpackLayer::onMouseDown(Event* event) {
 }
 
 
-// Ìí¼ÓÎïÆ·
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·
 bool BackpackLayer::addItem(const std::string& itemName, const int num) {
+    // å®‰å…¨æ£€æŸ¥ï¼šç¡®ä¿itemSlotså·²åˆå§‹åŒ–
+    if (itemSlots.empty()) {
+        CCLOG("Warning: itemSlots is empty in BackpackLayer::addItem()");
+        return false;
+    }
+    
     for (int i = 0; i < itemSlots.size(); ++i) {
         if (itemSlots[i].name == itemName) {
-            // Èç¹ûÎïÆ·ÒÑ´æÔÚ£¬Ôö¼ÓÊıÁ¿²¢¸üĞÂÏÔÊ¾
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½Ñ´ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
             itemSlots[i].quantity+=num;
             updateItemTexture(i);
 			return true;
@@ -157,7 +166,7 @@ bool BackpackLayer::addItem(const std::string& itemName, const int num) {
     }
     for (int i = 0; i < itemSlots.size(); ++i) {
         if (itemSlots[i].name == "") {
-            // ÕÒµ½¿Õ¸ñ×Ó£¬·ÅÈëÎïÆ·
+            // ï¿½Òµï¿½ï¿½Õ¸ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·
             itemSlots[i].name = itemName;
             itemSlots[i].quantity = num;
             updateItemTexture(i);
@@ -167,14 +176,14 @@ bool BackpackLayer::addItem(const std::string& itemName, const int num) {
 	return false; 
 }
 
-// ¼õÉÙÎïÆ·
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·
 bool BackpackLayer::removeItem(const std::string& itemName, const int num) {
     for (int i = 0; i < itemSlots.size(); ++i) {
-		// ´æÔÚ¸ÃÎïÆ·ÇÒÊıÁ¿×ã¹»
+		// ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¹»
         if (itemSlots[i].name == itemName && itemSlots[i].quantity >= num) {
             itemSlots[i].quantity -= num;
             if (itemSlots[i].quantity == 0) {
-                // ÎïÆ·ÊıÁ¿Îª 0£¬Çå¿Õ¸ÃÎ»ÖÃµÄÎÆÀí
+                // ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½Îª 0ï¿½ï¿½ï¿½ï¿½Õ¸ï¿½Î»ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½
                 itemSlots[i].name = "";
 				selectedItem = "";
                 clearItemTexture(i);
@@ -183,13 +192,13 @@ bool BackpackLayer::removeItem(const std::string& itemName, const int num) {
             else {
                 updateItemTexture(i);
             }
-            return true; // É¾³ıÎïÆ·³É¹¦
+            return true; // É¾ï¿½ï¿½ï¿½ï¿½Æ·ï¿½É¹ï¿½
         }
     }
     return false;
 }
 
-// »ñÈ¡Ñ¡ÖĞÎïÆ·
+// ï¿½ï¿½È¡Ñ¡ï¿½ï¿½ï¿½ï¿½Æ·
 std::string BackpackLayer::getSelectedItem() const {
     if (selectedItem.empty()) {
         return "";  
@@ -199,7 +208,7 @@ std::string BackpackLayer::getSelectedItem() const {
 }
 
 
-// ¸üĞÂÎïÆ·ÏÔÊ¾ÎÆÀí
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 void BackpackLayer::updateItemTexture(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= itemSlots.size()) return;
 
@@ -219,25 +228,25 @@ void BackpackLayer::updateItemTexture(int slotIndex) {
             slot.sprite->removeChildByTag(1001);
         }
 
-        // ¸üĞÂÊıÁ¿ÏÔÊ¾
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
         auto label = Label::createWithSystemFont(std::to_string(slot.quantity), "Arial", 6);
         label->setAnchorPoint(Vec2(0.0f, 0.6f));
         label->setPosition(slot.sprite->getContentSize().width, 0);
         label->setTextColor(Color4B::BLACK);
         slot.sprite->addChild(label, 1);
-		label->setTag(1001);// ÉèÖÃtagÖµ
+		label->setTag(1001);// ï¿½ï¿½ï¿½ï¿½tagÖµ
 
     }
 }
 
-// Çå³ıÎïÆ·ÎÆÀí
+// ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½
 void BackpackLayer::clearItemTexture(int slotIndex) {
     if (slotIndex < 0 || slotIndex >= itemSlots.size()) return;
 
     auto& slot = itemSlots[slotIndex];
     slot.sprite->removeAllChildren();  
 
-    //Çå¿ÕÎÆÀí
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	auto spriteSize = slot.sprite->getContentSize();
     int dataSize = spriteSize.width * spriteSize.width * 4;  
     unsigned char* transparentData = new unsigned char[dataSize];
