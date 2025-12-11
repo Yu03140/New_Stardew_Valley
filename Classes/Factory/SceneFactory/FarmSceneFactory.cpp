@@ -12,6 +12,9 @@
 #include "Player/PlayerAccount.h"
 // 不再需要包含Scene文件夹下的头文件，使用工厂创建场景
 #include "SceneFactory.h"
+//【观察者模式】
+//引入中介者
+#include "Getableitem/InteractionManager.h"
 
 USING_NS_CC;
 
@@ -288,7 +291,7 @@ void FarmSceneProduct::setupPlayer() {
                     sprite->setAnchorPoint(Vec2(0, 0));
                     sprite->setContentSize(Size(width, height));
                     tileMap->addChild(sprite, 2);
-                    sprite->init_mouselistener();
+                    //sprite->init_mouselistener();
                     crops[i].sprite = sprite;
                     
                     sprite->schedule([sprite](float dt) {
@@ -389,6 +392,9 @@ void FarmSceneProduct::onEnter() {
     // 关键修复1：重新初始化鼠标和键盘监听器（场景切换后需要重新注册）
     initMouseListener();
     initKeyboardListener();
+    // --- 【观察者模式】启动 InteractionManage ---
+    InteractionManager::getInstance()->startListening(this->getEventDispatcher());
+    CCLOG("[FarmScene] InteractionManager started listening.");
     
     // 关键修复2：确保背包层正确显示并更新全局变量
     auto backpacklayer = BackpackLayer::getInstance();
@@ -505,6 +511,10 @@ void FarmSceneProduct::onExit() {
     
     // 注意：scheduleUpdate() 注册的更新会在 Scene::onExit() 中自动清理
     // 不需要手动调用 unscheduleUpdate()
+
+    // --- 【观察者模式】停止 InteractionManage ---
+    InteractionManager::getInstance()->stopListening(this->getEventDispatcher());
+    CCLOG("[FarmScene] InteractionManager stopped listening.");
     
     SceneBase::onExit();
     is_infarm = 0;

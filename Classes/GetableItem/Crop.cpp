@@ -1,4 +1,7 @@
 #include "crop.h"
+#include "InteractionManager.h"
+
+//定义常量
 #define MAG_TIME_CROP 1.5f
 // 定义静态成员变量并初始化
 cocos2d::Texture2D* crop::transparent_texture = nullptr;
@@ -36,7 +39,7 @@ crop* crop::create(const std::string& plist_name, float width, float height)
     {
         crop_sprite->initWithTexture(transparentTexture);
         crop_sprite->autorelease();
-        crop_sprite->init_mouselistener();
+        //crop_sprite->init_mouselistener();
         CCLOG("Creation cope successfully!");
         return crop_sprite;
     }
@@ -45,78 +48,78 @@ crop* crop::create(const std::string& plist_name, float width, float height)
     return nullptr;
 }
 
-// 初始化鼠标监听器
-void crop::init_mouselistener()
-{
-    // 创建鼠标监听器
-    auto listener = cocos2d::EventListenerMouse::create();
-
-    // 鼠标按下时的回调
-    listener->onMouseDown = CC_CALLBACK_1(crop::on_mouse_click, this);
-    // 获取事件分发器，添加监听器
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-}
-// 鼠标按下时的回调
-void crop::on_mouse_click(cocos2d::Event* event)
-{
-    /*------------------------------------------------------renew-------------------------------------------------------------*/
-    //获取作物位置
-    Vec2 crop_pos = this->convertToWorldSpace(Vec2(0, 0));
-    // 计算点击的有效范围
-    float min_x = crop_pos.x;
-    float max_x = crop_pos.x + crop_size.width * MapSize;
-    float min_y = crop_pos.y;
-    float max_y = crop_pos.y + crop_size.height * MapSize;
-    if (is_in_control) {
-        if ((MOUSE_POS.x > min_x &&
-            MOUSE_POS.x < max_x &&
-            MOUSE_POS.y > min_y &&
-            MOUSE_POS.y < max_y))
-        {
-            CCLOG("click crop:%d", develop_level);
-            switch (develop_level)
-            {
-            case -1: //作物枯萎，点击铲除
-                CCLOG("clear the dead crop");
-                this->clear();
-                break;
-            case 5: //作物成熟，点击收获
-                CCLOG("harvest the crop");
-                this->harvest();
-            case 0://此时为空地
-                if (CROP_MAP.count(backpackLayer->getSelectedItem())) //手上拿的物品是植物种子
-                {
-                    CCLOG("plant a crop");
-                    this->planting(backpackLayer->getSelectedItem());
-                }
-                break;
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-                if (backpackLayer->getSelectedItem().find("Can") != std::string::npos) //手上的工具为水壶，执行浇水
-                {
-                    CCLOG("water this crop");
-                    this->water(backpackLayer->getSelectedItem());
-                }
-                else if (backpackLayer->getSelectedItem().find("fertilizer") != std::string::npos)//手上的工具为肥料，执行施肥
-                {
-                    CCLOG("fertilize this crop");
-                    this->fertilize(backpackLayer->getSelectedItem());
-                }
-                else
-                {
-                    CCLOG("%s couldn't do anything to the crop", backpackLayer->getSelectedItem().c_str());
-                }
-                break;
-            default:
-                CCLOG("ERROR develop_level!!!!");
-                break;
-            }
-
-        }
-    }
-}
+//// 初始化鼠标监听器
+//void crop::init_mouselistener()
+//{
+//    // 创建鼠标监听器
+//    auto listener = cocos2d::EventListenerMouse::create();
+//
+//    // 鼠标按下时的回调
+//    listener->onMouseDown = CC_CALLBACK_1(crop::on_mouse_click, this);
+//    // 获取事件分发器，添加监听器
+//    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+//}
+//// 鼠标按下时的回调
+//void crop::on_mouse_click(cocos2d::Event* event)
+//{
+//    /*------------------------------------------------------renew-------------------------------------------------------------*/
+//    //获取作物位置
+//    Vec2 crop_pos = this->convertToWorldSpace(Vec2(0, 0));
+//    // 计算点击的有效范围
+//    float min_x = crop_pos.x;
+//    float max_x = crop_pos.x + crop_size.width * MapSize;
+//    float min_y = crop_pos.y;
+//    float max_y = crop_pos.y + crop_size.height * MapSize;
+//    if (is_in_control) {
+//        if ((MOUSE_POS.x > min_x &&
+//            MOUSE_POS.x < max_x &&
+//            MOUSE_POS.y > min_y &&
+//            MOUSE_POS.y < max_y))
+//        {
+//            CCLOG("click crop:%d", develop_level);
+//            switch (develop_level)
+//            {
+//            case -1: //作物枯萎，点击铲除
+//                CCLOG("clear the dead crop");
+//                this->clear();
+//                break;
+//            case 5: //作物成熟，点击收获
+//                CCLOG("harvest the crop");
+//                this->harvest();
+//            case 0://此时为空地
+//                if (CROP_MAP.count(backpackLayer->getSelectedItem())) //手上拿的物品是植物种子
+//                {
+//                    CCLOG("plant a crop");
+//                    this->planting(backpackLayer->getSelectedItem());
+//                }
+//                break;
+//            case 1:
+//            case 2:
+//            case 3:
+//            case 4:
+//                if (backpackLayer->getSelectedItem().find("Can") != std::string::npos) //手上的工具为水壶，执行浇水
+//                {
+//                    CCLOG("water this crop");
+//                    this->water(backpackLayer->getSelectedItem());
+//                }
+//                else if (backpackLayer->getSelectedItem().find("fertilizer") != std::string::npos)//手上的工具为肥料，执行施肥
+//                {
+//                    CCLOG("fertilize this crop");
+//                    this->fertilize(backpackLayer->getSelectedItem());
+//                }
+//                else
+//                {
+//                    CCLOG("%s couldn't do anything to the crop", backpackLayer->getSelectedItem().c_str());
+//                }
+//                break;
+//            default:
+//                CCLOG("ERROR develop_level!!!!");
+//                break;
+//            }
+//
+//        }
+//    }
+//}
 
 //浇水,根据工具等级，工具等级越高，浇一次水的有效次数越多
 void crop::water(std::string name)
@@ -231,4 +234,122 @@ void crop::update_day(float deltaTime)
         now_day = timeSystem->getDay();
         watered_today = WATER_PRED + timeSystem->getweather();
     }
+}
+
+//【观察者模式】
+// 自动注册
+void crop::onEnter() {
+    CCLOG("[Crop] onEnter called for crop %p", this);
+    Sprite::onEnter();
+    CCLOG("[Crop] Registering crop %p with InteractionManager", this);
+    InteractionManager::getInstance()->registerObject(this);
+    CCLOG("[Crop] Crop %p registration completed", this);
+}
+
+// 自动注销
+void crop::onExit() {
+    CCLOG("[Crop] onExit called for crop %p", this);
+    CCLOG("[Crop] Unregistering crop %p from InteractionManager", this);
+    InteractionManager::getInstance()->unregisterObject(this);
+    Sprite::onExit();
+    CCLOG("[Crop] Crop %p unregistration completed", this);
+}
+
+// 替代原来的位置计算
+cocos2d::Rect crop::getBoundingBoxWorld() {
+    // 获取世界坐标原点
+    Vec2 worldPos = this->convertToWorldSpace(Vec2::ZERO);
+    // 使用 MapSize 进行放大 (保持你原有的逻辑)
+    cocos2d::Rect bbox = cocos2d::Rect(
+        worldPos.x,
+        worldPos.y,
+        crop_size.width * MapSize,
+        crop_size.height * MapSize
+    );
+    CCLOG("[Crop] getBoundingBoxWorld for crop %p: (%.2f, %.2f, %.2f, %.2f)", 
+          this, bbox.origin.x, bbox.origin.y, bbox.size.width, bbox.size.height);
+    return bbox;
+}
+
+// 核心业务逻辑 (完全去除了坐标判断和背包查找)
+bool crop::onInteract(const InteractContext& ctx) {
+    CCLOG("[Crop] onInteract called for crop %p", this);
+    CCLOG("[Crop] Context - isInControl: %s, toolName: '%s', toolLevel: %d, develop_level: %d", 
+          ctx.isInControl ? "true" : "false", ctx.toolName.c_str(), ctx.toolLevel, develop_level);
+    
+    // 1. 必须在控制范围内
+    if (!ctx.isInControl) {
+        CCLOG("[Crop] Interaction rejected - not in control range");
+        return false;
+    }
+
+    // 辅助 lambda：重新拼凑工具全名 (例如 "Can" + 1 -> "Can1")
+    // 你的旧函数依赖这个全名来解析等级和扣除背包物品
+    auto getFullToolName = [&]() -> std::string {
+        return ctx.toolName + std::to_string(ctx.toolLevel);
+        };
+
+    switch (develop_level) {
+    case -1: // 枯萎
+        CCLOG("[Crop] Handling withered crop - clearing");
+        //CCLOG("clear the dead crop");
+        this->clear(); // 直接调用现有函数
+        break;
+
+    case 5: // 收获
+        CCLOG("[Crop] Handling mature crop - harvesting");
+        //CCLOG("harvest the crop");
+        this->harvest(); // 直接调用现有函数
+        break;
+
+    case 0: // 空地：种植
+        CCLOG("[Crop] Handling empty soil - checking for planting");
+        // 种子比较特殊，它不在 ctx.toolName (因为那只存工具)，
+        // 所以我们这里还是需要访问背包获取当前拿的物品全名
+        if (backpackLayer && !backpackLayer->getSelectedItem().empty()) {
+            std::string currentItem = backpackLayer->getSelectedItem();
+            CCLOG("[Crop] Current selected item: '%s'", currentItem.c_str());
+            // 检查是否是种子
+            if (CROP_MAP.count(currentItem)) {
+                CCLOG("[Crop] Item is a valid seed - planting");
+                //CCLOG("plant a crop");
+                this->planting(currentItem); // 直接调用现有函数
+            } else {
+                CCLOG("[Crop] Item is not a valid seed");
+            }
+        } else {
+            CCLOG("[Crop] No item selected or backpack is null");
+        }
+        break;
+
+    case 1: case 2: case 3: case 4: // 成长阶段
+        CCLOG("[Crop] Handling growing crop - checking tool type");
+        if (ctx.toolName == "Can") {
+            // 这里的判断移到了 water 函数内部，但我们在外部做一个简单的工具类型检查
+            CCLOG("[Crop] Tool is watering can - attempting to water");
+            //CCLOG("water this crop");
+            // 传入拼凑好的名字 "Can1"
+            this->water(getFullToolName());
+        }
+        else if (ctx.toolName == "fertilizer") {
+            CCLOG("[Crop] Tool is fertilizer - attempting to fertilize");
+            //CCLOG("fertilize this crop");
+            // 传入拼凑好的名字 "fertilizer1"
+            this->fertilize(getFullToolName());
+        }
+        else {
+            // 如果是其他工具（比如锄头点到了作物），这里可以加个日志或者什么都不做
+            CCLOG("[Crop] Tool '%s' cannot be used on growing crops", ctx.toolName.c_str());
+            //CCLOG("%s couldn't do anything to the crop", ctx.toolName.c_str());
+        }
+        break;
+
+    default:
+        CCLOG("[Crop] ERROR: Invalid develop_level %d", develop_level);
+        //CCLOG("ERROR develop_level!!!!");
+        break;
+    }
+
+    CCLOG("[Crop] onInteract completed successfully for crop %p", this);
+    return true;
 }
