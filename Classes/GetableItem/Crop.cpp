@@ -1,4 +1,6 @@
 #include "crop.h"
+#include "Data/GameData.h"
+
 #define MAG_TIME_CROP 1.5f
 // 定义静态成员变量并初始化
 cocos2d::Texture2D* crop::transparent_texture = nullptr;
@@ -83,13 +85,24 @@ void crop::on_mouse_click(cocos2d::Event* event)
             case 5: //作物成熟，点击收获
                 CCLOG("harvest the crop");
                 this->harvest();
+                break;
             case 0://此时为空地
-                if (CROP_MAP.count(backpackLayer->getSelectedItem())) //手上拿的物品是植物种子
                 {
-                    CCLOG("plant a crop");
-                    this->planting(backpackLayer->getSelectedItem());
+                    //如果 GameData 里有这个 ID 的作物模型，说明手里拿的是种子
+                    std::string itemInHand = backpackLayer->getSelectedItem();
+                    if (GameData::getInstance()->getCropModel(itemInHand) != nullptr)
+                    {
+                        CCLOG("plant a crop: %s", itemInHand.c_str());
+                        this->planting(itemInHand);
+                    }
                 }
                 break;
+                //if (CROP_MAP.count(backpackLayer->getSelectedItem())) //手上拿的物品是植物种子
+                //{
+                //    CCLOG("plant a crop");
+                //    this->planting(backpackLayer->getSelectedItem());
+                //}
+                //break;
             case 1:
             case 2:
             case 3:
@@ -121,6 +134,9 @@ void crop::on_mouse_click(cocos2d::Event* event)
 //浇水,根据工具等级，工具等级越高，浇一次水的有效次数越多
 void crop::water(std::string name)
 {
+    // 只有种了东西 (_model存在) 且未死 (-1) 才能浇水
+    if (!_model || develop_level == -1) return;
+
     if (watered_today)//如果今天还有浇水次数
     {
         char last_char = name[name.size() - 1];
@@ -130,7 +146,8 @@ void crop::water(std::string name)
 
         // 在 0.2 秒后恢复原图
         this->scheduleOnce([this](float dt) {
-            this->setSpriteFrame(crop_name + "-" + std::to_string(this->develop_level) + ".png");
+                //this->setSpriteFrame(crop_name + "-" + std::to_string(this->develop_level) + ".png");
+                this->setSpriteFrame(_model->id + "-" + std::to_string(this->develop_level) + ".png");
             }, 0.2f, "reset_texture_crop");
 
         //背包水-1
@@ -143,18 +160,43 @@ void crop::water(std::string name)
 
 //种植
 void crop::planting(std::string name) {
-    if (CROP_MAP.at(name).at("season") == timeSystem->getSeason()) //此时是种植这个作物的季节
+    //if (CROP_MAP.at(name).at("season") == timeSystem->getSeason()) //此时是种植这个作物的季节
+    //{
+    //    crop_name = name;
+    //    develop_level = 1;
+    //    develop_day = CROP_MAP.at(name).at("develop_day");
+    //    std::string framename = this->crop_name + "-1.png";//显示第一阶段种植图片，表示种植成功
+    //    this->setSpriteFrame(framename);
+    //    this->setScale(MAG_TIME_CROP);
+
+    //    //背包里种子-1
+    //    backpackLayer->removeItem(name);
+    //    CCLOG("plant successfully");
+    //}
+    //else
+    //    CCLOG("the crop couldn't be planted in this season");
+
+    //修改为获取享元模型
+    CropModel* targetModel = GameData::getInstance()->getCropModel(name);
+
+    if (!targetModel) {
+        CCLOG("Error: Trying to plant unknown crop: %s", name.c_str());
+        return;
+    }
+
+    // 检查季节
+    if (targetModel->season == timeSystem->getSeason())
     {
-        crop_name = name;
+        _model = targetModel; // 绑定享元
         develop_level = 1;
-        develop_day = CROP_MAP.at(name).at("develop_day");
-        std::string framename = this->crop_name + "-1.png";//显示第一阶段种植图片，表示种植成功
+        // develop_day = ... (已删除，直接用 _model->developDays)
+
+        std::string framename = _model->id + "-1.png";
         this->setSpriteFrame(framename);
         this->setScale(MAG_TIME_CROP);
 
-        //背包里种子-1
         backpackLayer->removeItem(name);
-        CCLOG("plant successfully");
+        CCLOG("plant successfully: %s", _model->id.c_str());
     }
     else
         CCLOG("the crop couldn't be planted in this season");
@@ -166,7 +208,8 @@ void crop::fertilize(std::string name)
     char last_char = name[name.size() - 1];
     int level = last_char - '0';
     develop_level = std::min(develop_level + level, 5);
-    std::string framename = this->crop_name + "-" + std::to_string(this->develop_level) + ".png";
+    //std::string framename = this->crop_name + "-" + std::to_string(this->develop_level) + ".png";
+    std::string framename = _model->id + "-" + std::to_string(this->develop_level) + ".png";
     this->setSpriteFrame(framename);
 
     //背包里肥料-1
@@ -178,7 +221,8 @@ void crop::fertilize(std::string name)
 void crop::harvest()
 {
     //把生成物加入背包 
-    backpackLayer->addItem(HARVEST_MAP.at(crop_name));
+    //backpackLayer->addItem(HARVEST_MAP.at(crop_name));
+    backpackLayer->addItem(_model->harvestItem);
     //人物经验增加10
     Player* player = Player::getInstance("me");
     player->playerproperty.addExperience(EXPERIENCE);
@@ -191,11 +235,13 @@ void crop::clear()
 {
     water_count = 0;
     unwater_count = 0;
-    develop_day = 0;
+    //develop_day = 0;
     develop_level = 0;
-    crop_name = "";
+    //crop_name = "";
+    _model = nullptr;
     watered_today = 2 + timeSystem->getweather();
     this->initWithTexture(transparent_texture);
+    this->setScale(1.0f);//重置缩放
 }
 
 //更新
@@ -220,12 +266,19 @@ void crop::update_day(float deltaTime)
                 CCLOG("water successfully today:%d", water_count);
                 water_count++;
                 //查看是否需要更新成长状态
-                if (water_count > develop_level * develop_day && water_count <= MAX_LEVEL * develop_day) {
+                int daysPerLevel = _model->developDays;
+                if (water_count > develop_level * daysPerLevel && develop_level < 5) {
                     this->develop_level++;
-                    //更新显示的成长状态
-                    std::string framename = this->crop_name + "-" + std::to_string(this->develop_level) + ".png";
+
+                    std::string framename = _model->id + "-" + std::to_string(this->develop_level) + ".png";
                     this->setSpriteFrame(framename);
                 }
+                //if (water_count > develop_level * develop_day && water_count <= MAX_LEVEL * develop_day) {
+                //    this->develop_level++;
+                //    //更新显示的成长状态
+                //    std::string framename = this->crop_name + "-" + std::to_string(this->develop_level) + ".png";
+                //    this->setSpriteFrame(framename);
+                //}
             }
         }
         now_day = timeSystem->getDay();

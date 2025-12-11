@@ -1,38 +1,37 @@
 #include "getable_goods.h"
+#include "Data/GameData.h"
 
 
 cocos2d::Texture2D* getable_goods::transparent_texture = nullptr;
 
 void getable_goods::set_info(std::string name, Size size)
 {
-    sprite_name = name;
+    // 不再存字符串，而是从GameData中获取享元对象
+    //sprite_name = name;
+    _model = GameData::getInstance()->getItemModel(name);
     sprite_size = size;
 }
 
 getable_goods* getable_goods::create(const std::string& plist_name)
 {
-    //plistļ
+    //加载 plist
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
 
-    //ʵ
+    //实例化
     getable_goods* sprite = new getable_goods();
 
-    // ͸ڴ飬Ϊȫ͸ (RGBA8888 ʽ)
+    //创建透明纹理内存 (RGBA8888)
     int dataSize = DEFAULT_WIDTH * DEFAULT_HEIGHT * 4;  // ÿ 4 ֽڣRGBA ʽ
     unsigned char* transparentData = new unsigned char[dataSize];
 
-    // ͸ (ÿص 4 ֵͨΪ 0)
     memset(transparentData, 0, dataSize);
 
-    // ͸
     cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, DEFAULT_WIDTH, DEFAULT_HEIGHT, cocos2d::Size(DEFAULT_HEIGHT, DEFAULT_HEIGHT));
     transparent_texture = transparentTexture;
 
-    // ͷڴ
     delete[] transparentData;
 
-    //жǷܳɹ
     if (transparentTexture)
     {
         sprite->initWithTexture(transparentTexture);
@@ -49,29 +48,23 @@ getable_goods* getable_goods::create(const std::string& plist_name)
 void getable_goods::setImag()
 {
     CCLOG("getable_goods::setImag");
-    // ȡָ֡
-    cocos2d::SpriteFrame* frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name + ".png");
+    // 从_model获得ID
+    std::string name = _model->id;
+    cocos2d::SpriteFrame* frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(name + ".png");
+    //cocos2d::SpriteFrame* frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name + ".png");
     this->initWithSpriteFrame(frame);
     is_getable = 1;
 }
 
-//ʼ
 void getable_goods::init_mouselistener()
 {
-    // 
     auto listener = cocos2d::EventListenerMouse::create();
-
-    // ص
     listener->onMouseDown = CC_CALLBACK_1(getable_goods::on_mouse_click, this);
-
-    // ȡ¼ַӼ
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
-// 갴ʱĻص
 void getable_goods::on_mouse_click(cocos2d::Event* event)
 {
-    //ȡƷλ
     Vec2 goods_pos = this->convertToWorldSpace(Vec2(0, 0));
     Vec2 mouse_pos;
     float min_x;
@@ -116,7 +109,8 @@ void getable_goods::on_mouse_click(cocos2d::Event* event)
             mouse_pos.y < max_y))
         {
             CCLOG("good click");
-            CCLOG("%s", sprite_name.c_str());
+            //CCLOG("%s", sprite_name.c_str());
+            ///CCLOG("%s", _model->getID().c_str());
             
             // 关键修复：所有场景都需要检查工具匹配（除了明确不需要工具的物品）
             // 安全获取BackpackLayer实例
@@ -126,7 +120,8 @@ void getable_goods::on_mouse_click(cocos2d::Event* event)
                 return;
             }
             
-            std::string requiredTool = GOODS_MAP.at(sprite_name).at("tool");
+            //std::string requiredTool = GOODS_MAP.at(sprite_name).at("tool");
+            std::string requiredTool = _model->requiredTool;
             bool canInteract = false;
             
             // 如果不需要工具（空字符串），直接允许交互
@@ -180,8 +175,10 @@ void getable_goods::show_click_bar()
         click_bar->show_progress_bar(cocos2d::Vec2(this->getPositionX(), this->getPositionY() + this->getContentSize().height / 2 + 5));
     }
 
-    // 㵱ǰĽȰٷֱ
-    float progressValue = (float)click_count / (float)GOODS_CLICK_MAP.at(sprite_name) * 100.0f;
+    //从享元获取最大点击数
+    //float progressValue = (float)click_count / (float)GOODS_CLICK_MAP.at(sprite_name) * 100.0f;
+    //float progressValue = (float)click_count / (float)_model->getMaxClicks() * 100.0f;
+    float progressValue = (float)click_count / (float)_model->maxClicks * 100.0f;
 
     click_bar->update_progress_bar(progressValue);
 
@@ -199,33 +196,65 @@ void getable_goods::hide_click_bar()
 }
 void getable_goods::update()
 {
-    //жǷܻ
-    if (click_count >= GOODS_CLICK_MAP.at(sprite_name))
+    //更新为享元模式
+    //if (click_count >= GOODS_CLICK_MAP.at(sprite_name))
+    //{
+    //    this->hide_click_bar();
+    //    //뱳 
+    //    // 安全获取BackpackLayer实例，避免访问已销毁的对象
+    //    auto* safeBackpackLayer = BackpackLayer::getInstance();
+    //    if (safeBackpackLayer) {
+    //        safeBackpackLayer->addItem(GOODS_MAP.at(sprite_name).at("get"));
+    //        if (sprite_name == "bigstone")
+    //            safeBackpackLayer->addItem(GOODS_MAP.at(sprite_name).at("get"));
+    //    } else {
+    //        CCLOG("Warning: BackpackLayer instance is null in getable_goods::update()");
+    //    }
+    //    //ﾭ
+    //    Player* player = Player::getInstance("me");
+    //    player->playerproperty.addExperience(EXPERIENCE * GOODS_CLICK_MAP.at(sprite_name));
+    //    if (sprite_name == "badGreenhouse") {
+    //        this->setSpriteFrame("newGreenhouse.png");
+    //        is_getable = 0;
+    //    }
+    //    else {
+    //        this->setTexture(transparent_texture);//Ϊ͸
+    //        click_count = 0;//
+    //        is_getable = 0;
+    //    }
+    //}
+
+    if (!_model) return;
+
+        if (click_count >= _model->maxClicks)
     {
         this->hide_click_bar();
-        //뱳 
-        // 安全获取BackpackLayer实例，避免访问已销毁的对象
         auto* safeBackpackLayer = BackpackLayer::getInstance();
         if (safeBackpackLayer) {
-            safeBackpackLayer->addItem(GOODS_MAP.at(sprite_name).at("get"));
-            if (sprite_name == "bigstone")
-                safeBackpackLayer->addItem(GOODS_MAP.at(sprite_name).at("get"));
-        } else {
-            CCLOG("Warning: BackpackLayer instance is null in getable_goods::update()");
+
+            // 获取掉落物
+            safeBackpackLayer->addItem(_model->dropItem);
+
+            // 特殊逻辑：bigstone 掉两份
+            if (_model->id == "bigstone")
+                safeBackpackLayer->addItem(_model->dropItem);
         }
-        //ﾭ
+
         Player* player = Player::getInstance("me");
-        player->playerproperty.addExperience(EXPERIENCE * GOODS_CLICK_MAP.at(sprite_name));
-        if (sprite_name == "badGreenhouse") {
+        // 经验值逻辑
+        player->playerproperty.addExperience(EXPERIENCE * _model->maxClicks);
+
+        if (_model->id == "badGreenhouse") {
             this->setSpriteFrame("newGreenhouse.png");
             is_getable = 0;
         }
         else {
-            this->setTexture(transparent_texture);//Ϊ͸
-            click_count = 0;//
+            this->setTexture(transparent_texture); // 变透明
+            click_count = 0;
             is_getable = 0;
         }
     }
+
 }
 
 void getable_goods::add_in(ValueMap dict, getable_goods* sprite, std::string name, cocos2d::TMXTiledMap* tileMap)

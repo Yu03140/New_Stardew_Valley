@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "Global/Global.h"
+#include "Data/GameModels.h"
 
 #define FOOD "straw"
 #define SPEED 10.0f
@@ -10,20 +11,25 @@
 #define EDGE1 120
 #define EDGE0 10
 
-const std::unordered_map<std::string, int> ANIMAL_MAP = { {"Pig",5},{"Goat",5},{"Chicken",1} ,{"Cow",7} };                                                  //动物的成长图鉴
-const std::unordered_map<std::string, std::string> PRODUCE_MAP = { {"Pig","truffle"},{"Goat","goat_wool"},{"Chicken","chicken_egg"} ,{"Cow","cow_milk"} };  //动物生成物
+//移入 GameData
+//const std::unordered_map<std::string, int> ANIMAL_MAP = { {"Pig",5},{"Goat",5},{"Chicken",1} ,{"Cow",7} };                                                  //动物的成长图鉴
+//const std::unordered_map<std::string, std::string> PRODUCE_MAP = { {"Pig","truffle"},{"Goat","goat_wool"},{"Chicken","chicken_egg"} ,{"Cow","cow_milk"} };  //动物生成物
 
 class animals : public cocos2d::Sprite
 {
 private:
 
-    Sprite* produce;
+    Sprite* produce = nullptr;
     int now_day = 0;                                                        //当前日期
-    std::string animals_name;                                               //动物的名称
-    int produce_day;                                                        //每次生成附属品所需要的天数
+
+    //std::string animals_name;                                               //动物的名称
+    //int produce_day;                                                        //每次生成附属品所需要的天数
+    AnimalModel* _model = nullptr;
+
     bool is_produce = 0;                                                    //是否生成附属品
     int feed_count = 0;                                                     //喂养总天数
     int feed_today = 1;                                                     //今天剩余喂养次数
+
 	static cocos2d::Texture2D* transparent_texture;
     cocos2d::Size produce_size;
     cocos2d::Vec2 produce_pos;
@@ -49,6 +55,7 @@ public:
     void create_produce();                                                  // 生成附属品
     void harvest();                                                         // 收获功能
     void update_day(float deltaTime);                                       // 新一天的更新
+
 };
 
 class AnimalsManager :public Node
@@ -60,7 +67,5 @@ public:
     void add_animals(animals* sprite);                                      // 添加精灵到容器
     void schedule_animals();                                                // 迭代器遍历访问精灵
 };
-
-
 
 #endif __ANIMALS_H__
