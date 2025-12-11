@@ -1,6 +1,7 @@
-#include "InteractionManager.h"
-#include "Global/Global.h" // ÒýÈëÄãµÄÈ«¾Ö±äÁ¿
-#include "./Charactor/BackpackLayer.h" // ÎªÁË»ñÈ¡¹¤¾ß
+ï»¿#include "InteractionManager.h"
+#include "Global/Global.h" // å¼•å…¥ä½ çš„å…¨å±€å˜é‡
+#include "./Charactor/BackpackLayer.h" // ä¸ºäº†èŽ·å–å·¥å…·
+#include "./Moveable/moveable_sprite_key.h"
 
 InteractionManager* InteractionManager::_instance = nullptr;
 
@@ -40,7 +41,7 @@ void InteractionManager::startListening(cocos2d::EventDispatcher* dispatcher) {
     CCLOG("[InteractionManager] Starting mouse event listening");
     _mouseListener = cocos2d::EventListenerMouse::create();
     _mouseListener->onMouseDown = CC_CALLBACK_1(InteractionManager::onMouseDown, this);
-    // Ê¹ÓÃ½ÏµÍÓÅÏÈ¼¶£¬±£Ö¤ UI ²ã (Backpack) ÄÜÏÈÀ¹½Ø
+    // ä½¿ç”¨è¾ƒä½Žä¼˜å…ˆçº§ï¼Œä¿è¯ UI å±‚ (Backpack) èƒ½å…ˆæ‹¦æˆª
     dispatcher->addEventListenerWithFixedPriority(_mouseListener, 1);
     _isListening = true;
     CCLOG("[InteractionManager] Mouse event listener started successfully");
@@ -49,29 +50,33 @@ void InteractionManager::startListening(cocos2d::EventDispatcher* dispatcher) {
 void InteractionManager::onMouseDown(cocos2d::Event* event) {
     CCLOG("[InteractionManager] Mouse down event received. Subscribers count: %d", (int)_subscribers.size());
     
-    // 1. ×¼±¸ÉÏÏÂÎÄÊý¾Ý
+    // 1. å‡†å¤‡ä¸Šä¸‹æ–‡æ•°æ®
     InteractContext ctx;
-    ctx.isInControl = is_in_control; // À´×Ô Global.h
+    ctx.isInControl = is_in_control; // æ¥è‡ª Global.h
     CCLOG("[InteractionManager] isInControl: %s", ctx.isInControl ? "true" : "false");
 
-    // 2. ½âÎöÊó±êÎ»ÖÃ 
+    // 2. è§£æžé¼ æ ‡ä½ç½® 
     cocos2d::EventMouse* e = (cocos2d::EventMouse*)event;
     //CCLOG("[InteractionManager] is_infarm: %s", is_infarm ? "true" : "false");
     
     if (is_infarm) {
-        // ÔÚÅ©³¡ÖÐ£¬Ê¹ÓÃµÄÊÇÈ«¾Ö±äÁ¿ MOUSE_POS
+        // åœ¨å†œåœºä¸­ï¼Œä½¿ç”¨çš„æ˜¯å…¨å±€å˜é‡ MOUSE_POS
         ctx.mousePosWorld = MOUSE_POS;
         CCLOG("[InteractionManager] Farm mode - using MOUSE_POS: (%.2f, %.2f)", ctx.mousePosWorld.x, ctx.mousePosWorld.y);
     }
     else {
-        // ÔÚ·ÇÅ©³¡£¬ÄãÐèÒª°ÑÆÁÄ»×ø±ê×ªÎª½Úµã¿Õ¼ä×ø±ê
-        cocos2d::Vec2 viewPos = e->getLocationInView();
-        ctx.mousePosWorld = cocos2d::Director::getInstance()->convertToGL(viewPos);
-        CCLOG("[InteractionManager] Non-farm mode - ViewPos: (%.2f, %.2f), WorldPos: (%.2f, %.2f)", 
-              viewPos.x, viewPos.y, ctx.mousePosWorld.x, ctx.mousePosWorld.y);
+        // åœ¨éžå†œåœºï¼Œä½¿ç”¨å’ŒFarmåœºæ™¯ç›¸åŒçš„åæ ‡è½¬æ¢æ–¹æ³•
+        // è¿™æ ·ç¡®ä¿Mineåœºæ™¯å’ŒFarmåœºæ™¯çš„åæ ‡ç³»ç»Ÿä¸€è‡´
+        cocos2d::Vec2 mousePosition = e->getLocationInView();
+        auto camera = cocos2d::Director::getInstance()->getRunningScene()->getDefaultCamera();
+        auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
+        cocos2d::Vec2 windowOrigin = camera->getPosition() - cocos2d::Vec2(visibleSize.width / 2, visibleSize.height / 2);
+        ctx.mousePosWorld = mousePosition + windowOrigin;
+        CCLOG("[InteractionManager] Non-farm mode - ViewPos: (%.2f, %.2f), WindowOrigin: (%.2f, %.2f), WorldPos: (%.2f, %.2f)", 
+              mousePosition.x, mousePosition.y, windowOrigin.x, windowOrigin.y, ctx.mousePosWorld.x, ctx.mousePosWorld.y);
     }
 
-    // 3. ½âÎö¹¤¾ßÐÅÏ¢ (´Ó BackpackLayer »ñÈ¡)
+    // 3. è§£æžå·¥å…·ä¿¡æ¯ (ä»Ž BackpackLayer èŽ·å–)
     ctx.toolName = "";
     ctx.toolLevel = 0;
 
@@ -80,15 +85,15 @@ void InteractionManager::onMouseDown(cocos2d::Event* event) {
         CCLOG("[InteractionManager] Selected item from backpack: '%s'", itemStr.c_str());
         
         if (!itemStr.empty()) {
-            // ½âÎöµÈ¼¶ (¼ÙÉè¸ñÊ½Îª "Hoe1")
+            // è§£æžç­‰çº§ (å‡è®¾æ ¼å¼ä¸º "Hoe1")
             char lastChar = itemStr.back();
             if (isdigit(lastChar)) {
                 ctx.toolLevel = lastChar - '0';
-                ctx.toolName = itemStr.substr(0, itemStr.size() - 1); // È¥µôÊý×Ö
+                ctx.toolName = itemStr.substr(0, itemStr.size() - 1); // åŽ»æŽ‰æ•°å­—
                 CCLOG("[InteractionManager] Parsed tool - Name: '%s', Level: %d", ctx.toolName.c_str(), ctx.toolLevel);
             }
             else {
-                ctx.toolLevel = 1; // Ä¬ÈÏµÈ¼¶
+                ctx.toolLevel = 1; // é»˜è®¤ç­‰çº§
                 ctx.toolName = itemStr;
                 CCLOG("[InteractionManager] Tool without level digit - Name: '%s', Default Level: %d", ctx.toolName.c_str(), ctx.toolLevel);
             }
@@ -99,7 +104,7 @@ void InteractionManager::onMouseDown(cocos2d::Event* event) {
         CCLOG("[InteractionManager] BackpackLayer is null!");
     }
 
-    // 4. Ñ°ÕÒ±»µã»÷µÄ¶ÔÏó
+    // 4. å¯»æ‰¾è¢«ç‚¹å‡»çš„å¯¹è±¡
     IInteractable* target = nullptr;
     int maxPriority = -999;
     int checkedObjects = 0;
@@ -117,12 +122,12 @@ void InteractionManager::onMouseDown(cocos2d::Event* event) {
         }
         interactableObjects++;
 
-        // »ñÈ¡¶ÔÏóµÄ°üÎ§ºÐ
+        // èŽ·å–å¯¹è±¡çš„åŒ…å›´ç›’
         cocos2d::Rect bbox = obj->getBoundingBoxWorld();
         CCLOG("[InteractionManager] Object %p bbox: (%.2f, %.2f, %.2f, %.2f)", 
               obj, bbox.origin.x, bbox.origin.y, bbox.size.width, bbox.size.height);
 
-        // Ö´ÐÐÅö×²¼ì²â
+        // æ‰§è¡Œç¢°æ’žæ£€æµ‹
         if (bbox.containsPoint(ctx.mousePosWorld)) {
             hitObjects++;
             int p = obj->getInteractPriority();
@@ -142,14 +147,23 @@ void InteractionManager::onMouseDown(cocos2d::Event* event) {
     
     //CCLOG("[InteractionManager] Collision detection complete - Checked: %d, Interactable: %d, Hit: %d, Final target: %p", checkedObjects, interactableObjects, hitObjects, target);
 
-    // 5. ´¥·¢½»»¥
+    // 5. è§¦å‘äº¤äº’
     if (target) {
         CCLOG("[InteractionManager] Triggering interaction with target %p", target);
         bool handled = target->onInteract(ctx);
         CCLOG("[InteractionManager] Interaction result: %s", handled ? "handled" : "not handled");
         
+        //// ã€è§‚å¯Ÿè€…æ¨¡å¼ï¼šå¦‚æžœä½¿ç”¨äº†å·¥å…·ï¼Œé€šçŸ¥å·¥å…·ç²¾çµæ’­æ”¾ç‚¹å‡»åŠ¨ç”»ã€‘
+        //// åªæœ‰å½“ä½¿ç”¨äº†å·¥å…· (toolNameéžç©º) æ—¶æ‰è§¦å‘åŠ¨ç”»
+        //if (!ctx.toolName.empty()) {
+        //    if (::sprite_tool) {
+        //        ::sprite_tool->playClickAnimation(); // ðŸ‘ˆ è°ƒç”¨æ–°å‡½æ•°
+        //        CCLOG("[InteractionManager] Notified tool %p to play click animation.", ::sprite_tool);
+        //    }
+        //}
+
         if (handled) {
-            event->stopPropagation(); // ×èÖ¹ÊÂ¼þ¼ÌÐø´«²¥
+            event->stopPropagation(); // é˜»æ­¢äº‹ä»¶ç»§ç»­ä¼ æ’­
             CCLOG("[InteractionManager] Event propagation stopped");
         }
     } else {

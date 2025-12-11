@@ -196,8 +196,10 @@ void FarmSceneProduct::setupPlayer() {
             sprite_tool->setPosition(Vec2(visibleSize.width / 2 + origin.x + scaledSize.width / 2,
                 visibleSize.height / 2 + origin.y));
             this->addChild(sprite_tool, 1);
+            // 【观察者模式】将场景成员变量赋给全局变量
+            ::sprite_tool = sprite_tool;
             sprite_tool->init_keyboardlistener();
-            sprite_tool->init_mouselistener();
+            // sprite_tool->init_mouselistener();
             // 创建局部变量用于 lambda 捕获，避免捕获 this 指针
             auto spriteToolPtr = sprite_tool;
             sprite_tool->schedule([spriteToolPtr](float dt) {
@@ -478,15 +480,16 @@ void FarmSceneProduct::onEnterTransitionDidFinish() {
             CCLOG("ERROR: sprite_move is null in delayed reinit!");
         }
         
-        // 关键修复：重新初始化工具精灵的鼠标监听器
-        if (sprite_tool && sprite_tool->getParent() && sprite_tool->isRunning()) {
-            // 先移除旧的监听器，避免重复注册
-            sprite_tool->getEventDispatcher()->removeEventListenersForTarget(sprite_tool);
-            
-            // 重新初始化鼠标监听器
-            sprite_tool->init_mouselistener();
-            CCLOG("Tool sprite mouse listener reinitialized in FarmScene onEnterTransitionDidFinish (delayed)");
-        }
+        //// 关键修复：重新初始化工具精灵的鼠标监听器
+        //if (sprite_tool && sprite_tool->getParent() && sprite_tool->isRunning()) {
+        //    // 先移除旧的监听器，避免重复注册
+        //    sprite_tool->getEventDispatcher()->removeEventListenersForTarget(sprite_tool);
+        //    
+        //    // 重新初始化鼠标监听器
+        //    sprite_tool->init_mouselistener();
+        //    CCLOG("Tool sprite mouse listener reinitialized in FarmScene onEnterTransitionDidFinish (delayed)");
+        //}
+
     }, 0.1f, "reinit_listeners_after_transition");
 }
 
@@ -604,9 +607,21 @@ void FarmSceneProduct::onMouseClick(Event* event) {
             mouse_pos.y < playerPos.y + CONTROL_RANGE) {
             is_in_control = 1;
             CCLOG("Mouse click in control range, is_in_control set to 1");
+
+            // 【观察者模式：如果点在控制范围内，立即播放工具动画】
+            // 确保 ::sprite_tool 已在 Global.h/cpp 中声明和 FarmSceneProduct::setupPlayer 中赋值
+            if (::sprite_tool && !::sprite_tool->get_sprite_name_tool().empty()) {
+                // 假设 moveable_sprite_key_tool::get_selected_item_name() 存在
+                // 或者我们直接调用 playClickAnimation()，让它自己检查是否有选中工具。
+                ::sprite_tool->playClickAnimation();
+                CCLOG("Tool animation played due to control range click.");
+            }
+            checkForButtonClick(mouse_pos);
+
         } else {
             is_in_control = 0;
         }
+
     }
     
     // 检查是否点击在背包层上（背包层在屏幕底部，大约占屏幕高度的1/4）
@@ -630,8 +645,6 @@ void FarmSceneProduct::onMouseClick(Event* event) {
         }
     }
     
-    checkForButtonClick(mouse_pos);
-    
     this->scheduleOnce([this](float dt) {
         MOUSE_POS = Vec2::ZERO;
     }, 1.5f, "reset_mouse_pos_key");
@@ -646,7 +659,6 @@ void FarmSceneProduct::checkForButtonClick(Vec2 mousePosition) {
     if (!tileMap) {
         return;
     }
-    
     auto objectGroup = tileMap->getObjectGroup("Button");
     if (!objectGroup) {
         return;
@@ -654,7 +666,7 @@ void FarmSceneProduct::checkForButtonClick(Vec2 mousePosition) {
     
     std::string Objectname[3] = { "Mines_Door", "Home_Door", "Shed_Door" };
     Scene* nextScene = nullptr;
-    
+    CCLOG("[scene]mouse in control");
     for (int i = 0; i < 3; i++) {
         auto object = objectGroup->getObject(Objectname[i]);
         if (object.empty()) {
