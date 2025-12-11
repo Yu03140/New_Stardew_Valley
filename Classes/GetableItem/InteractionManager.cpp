@@ -130,8 +130,7 @@ void InteractionManager::onMouseDown(cocos2d::Event* event) {
             
             if (p > maxPriority) {
                 if (target) {
-                    //CCLOG("[InteractionManager] Replacing previous target %p (priority %d) with %p (priority %d)", 
-                          target, maxPriority, obj, p);
+                    //CCLOG("[InteractionManager] Replacing previous target %p (priority %d) with %p (priority %d)", target, maxPriority, obj, p);
                 }
                 maxPriority = p;
                 target = obj;
@@ -141,8 +140,7 @@ void InteractionManager::onMouseDown(cocos2d::Event* event) {
         }
     }
     
-    //CCLOG("[InteractionManager] Collision detection complete - Checked: %d, Interactable: %d, Hit: %d, Final target: %p", 
-          checkedObjects, interactableObjects, hitObjects, target);
+    //CCLOG("[InteractionManager] Collision detection complete - Checked: %d, Interactable: %d, Hit: %d, Final target: %p", checkedObjects, interactableObjects, hitObjects, target);
 
     // 5. ´¥·¢½»»¥
     if (target) {

@@ -1,6 +1,7 @@
 // MinesSceneFactory.cpp
 #include "MinesSceneFactory.h"
 #include "GetableItem/getable_goods.h"
+#include "GetableItem/InteractionManager.h"
 
 USING_NS_CC;
 
@@ -242,6 +243,11 @@ void MinesSceneProduct::onEnter() {
     // 关键修复1：重新初始化鼠标和键盘监听器（场景切换后需要重新注册）
     initMouseListener();
     initKeyboardListener();
+
+    // --- 【观察者模式】启动 InteractionManager ---
+    InteractionManager::getInstance()->startListening(this->getEventDispatcher());
+    CCLOG("[MinesScene] InteractionManager started listening.");
+    // --------------------------------------------------------
     
     // 设置非农场场景标志
     is_infarm = 0;
@@ -323,6 +329,11 @@ void MinesSceneProduct::onExit() {
     
     // 注意：scheduleUpdate() 注册的更新会在 Scene::onExit() 中自动清理
     // 不需要手动调用 unscheduleUpdate()
+
+    // --- 【观察者模式】停止 InteractionManager ---
+    InteractionManager::getInstance()->stopListening(this->getEventDispatcher());
+    CCLOG("[MinesScene] InteractionManager stopped listening.");
+    // --------------------------------------------------------
     
     SceneBase::onExit();
 }
