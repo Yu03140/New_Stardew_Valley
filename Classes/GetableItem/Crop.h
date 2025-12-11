@@ -4,6 +4,7 @@
 #include "cocos2d.h"
 #include "Global/Global.h"
 #include "IInteractable.h"
+#include "Data/GameModels.h"
 
 #define MAX_LEVEL 5
 #define DIE_DRY 4
@@ -13,28 +14,30 @@ struct GOODS_INHAND {
     std::string goods_name;
 };
 
-//作物种植相关信息
-const std::unordered_map<std::string, std::unordered_map<std::string, int>> CROP_MAP =
-{
-    {"strawberry",{{"develop_day",5},{"season",SPRING}}},
-    {"sunflour",{{"develop_day",4},{"season",SUMMER}}},
-    {"pumpkin",{{"develop_day",5},{"season",AUTUMN}}}
-};
-//作物成熟后得到的生成品
-const std::unordered_map<std::string, std::string> HARVEST_MAP =
-{
-    {"strawberry","strawberry_fruit"},
-    {"sunflour","sunflour_fruit"},
-    {"pumpkin","sunflour_fruit"}
-};
+////移动到GameData
+////作物种植相关信息
+//const std::unordered_map<std::string, std::unordered_map<std::string, int>> CROP_MAP =
+//{
+//    {"strawberry",{{"develop_day",5},{"season",SPRING}}},
+//    {"sunflour",{{"develop_day",4},{"season",SUMMER}}},
+//    {"pumpkin",{{"develop_day",5},{"season",AUTUMN}}}
+//};
+////作物成熟后得到的生成品
+//const std::unordered_map<std::string, std::string> HARVEST_MAP =
+//{
+//    {"strawberry","strawberry_fruit"},
+//    {"sunflour","sunflour_fruit"},
+//    {"pumpkin","sunflour_fruit"}
+//};
 
 class crop : public cocos2d::Sprite, public IInteractable
 {
 private:
     int now_day = 0;                             //当前日期
-    std::string crop_name;                       //作物的名称
-    int develop_day;                              //每成长一阶段所需要的天数
 
+    //std::string crop_name;                       //作物的名称
+    //int develop_day;                              //每成长一阶段所需要的天数
+    CropModel* _model = nullptr;
     int water_count = 0;                         //浇水总天数
     int unwater_count = 0;                       //没有浇水的连续天数
     int develop_level = 0;                       //目前生长阶段
@@ -45,6 +48,9 @@ private:
 public:
     
     static crop* create(const std::string& plist_name, float width, float height);  // 创建实例 
+
+	std::string getCropID() const { return _model ? _model->id : ""; }              // 获取作物ID
+
     //【原有逻辑】
     //void init_mouselistener();                                                      // 初始化鼠标监听器
     //void on_mouse_click(cocos2d::Event* event);                                     // 鼠标按下时的回调 
