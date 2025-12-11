@@ -1,4 +1,6 @@
 #include "Fish.h"
+#include "Data/GameData.h"
+
 #define MAG_TIME_CROP 1.5f
 // 定义静态成员变量并初始化
 cocos2d::Texture2D* fish::transparent_texture = nullptr;
@@ -14,6 +16,7 @@ fish* fish::create(const std::string& plist_name, float width, float height)
 
     //创建实例
     fish* fish_sprite = new fish();
+    fish_sprite->setFishType("bluefish");
 
     // 创建透明的内存块，设置为全透明 (RGBA8888 格式)
     int dataSize = width * height * 4;  // 每个像素 4 字节（RGBA 格式）
@@ -35,13 +38,20 @@ fish* fish::create(const std::string& plist_name, float width, float height)
     if (transparentTexture)
     {
         fish_sprite->initWithTexture(transparentTexture);
-
         fish_sprite->autorelease();
         fish_sprite->init_mouselistener();
         return fish_sprite;
     }
     CC_SAFE_DELETE(fish_sprite);
     return nullptr;
+}
+
+void fish::setFishType(const std::string& id)
+{
+    _model = GameData::getInstance()->getFishModel(id);
+    if (!_model) {
+        CCLOG("Error: Fish model not found for ID: %s", id.c_str());
+    }
 }
 
 // 初始化鼠标监听器
@@ -54,6 +64,7 @@ void fish::init_mouselistener()
     // 获取事件分发器，添加监听器
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
+
 // 鼠标按下时的回调
 void fish::on_mouse_click(cocos2d::Event* event)
 {
@@ -85,7 +96,6 @@ void fish::on_mouse_click(cocos2d::Event* event)
                 {
                     CCLOG("couldn't do anything to the crop");
                 }
-
         }
     }
 }
@@ -126,12 +136,17 @@ void fish::fishing(std::string name)
     else {
         CCLOG("Failed to create sprite.");
     }
-    std::string framename = "bluefish.png";
+    //std::string framename = "bluefish.png";
+    std::string framename = _model->id + ".png";
     this->setSpriteFrame(framename);
 
-    CCLOG("%s", HARVEST_FISH_MAP.at(fish_name));
+    //CCLOG("%s", HARVEST_FISH_MAP.at(fish_name));
+    CCLOG("Harvesting: %s", _model->harvestItem.c_str());
+
     //把生成物加入背包 
-    backpackLayer->addItem(fish_name,1);
+    //backpackLayer->addItem(fish_name,1);
+    backpackLayer->addItem(_model->harvestItem, 1);
+
     //人物经验增加10
     Player* player = Player::getInstance("me");
     player->playerproperty.addExperience(EXPERIENCE);
@@ -142,6 +157,7 @@ void fish::fishing(std::string name)
 //清除
 void fish::clear()
 {
-    fish_name = "";
+    //fish_name = "";
+    _model = nullptr;
     this->initWithTexture(transparent_texture);
 }

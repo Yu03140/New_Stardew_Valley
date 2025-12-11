@@ -1,42 +1,44 @@
 #include "animals.h"
+#include "Data/GameData.h"
 
 cocos2d::Texture2D* animals::transparent_texture = nullptr;
 int animals::count = 0;
 
 animals::animals()
 {
-    produce = new Sprite();
+    //produce = new Sprite();
+    produce = Sprite::create();
+    produce->retain();
     ID = ++count;
 }
 
-// ���������Ϣ
+// 保存基本信息
 void animals::set_info(std::string name, cocos2d::Vec2 pos, cocos2d::Size size)
 {
-    // ���û�����Ϣ
-    animals_name = name;
+    //animals_name = name;
+    _model = GameData::getInstance()->getAnimalModel(name);
     produce_size = size;
     produce_pos = pos;
-    produce_day = ANIMAL_MAP.at(animals_name);
-    // ����͸�����ڴ��
-    int dataSize = size.width * size.height * 4; 
-    unsigned char* transparentData = new unsigned char[dataSize];
-    memset(transparentData, 0, dataSize);
-    cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
-    transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, size.width, size.height, size);
-    transparent_texture = transparentTexture;
+    //produce_day = ANIMAL_MAP.at(animals_name);
 
-    // �ͷ��ڴ�
-    delete[] transparentData;
+    if (transparent_texture == nullptr) {
+        int dataSize = size.width * size.height * 4;
+        unsigned char* transparentData = new unsigned char[dataSize];
+        memset(transparentData, 0, dataSize);
+        transparent_texture = new cocos2d::Texture2D();
+        transparent_texture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, size.width, size.height, size);
+        delete[] transparentData;
+    }
 }
 
-// ����ʵ��
+// 创建实例
 animals* animals::create(const std::string& plist_name)
 {
 
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
     animals* animals_sprite = new animals();
     
-    if (animals_sprite)
+    if (animals_sprite && animals_sprite->init())
     {
         CCLOG("Creation animal successfully!");
         animals_sprite->autorelease();
@@ -48,18 +50,19 @@ animals* animals::create(const std::string& plist_name)
     return nullptr;
 }
 
-// ͼƬ����
+// 图片设置
 void animals::set_imag()
 {
-    if (produce && transparent_texture) {
-        this->setSpriteFrame(animals_name + "-front.png");
+    if (produce && transparent_texture && _model) {
+        //this->setSpriteFrame(animals_name + "-front.png");
+        this->setSpriteFrame(_model->id + "-front.png");
         produce->initWithTexture(transparent_texture);
         produce->autorelease();
         produce->setPosition(produce_pos);
     }
 }
 
-// ��ʼ����������
+// 初始化鼠标监听器
 void animals::init_mouselistener()
 {
     auto listener = cocos2d::EventListenerMouse::create();
@@ -67,7 +70,7 @@ void animals::init_mouselistener()
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
-// ��갴��ʱ�Ļص�
+// 鼠标按下时的回调
 void animals::on_mouse_click(cocos2d::Event* event)
 {
     auto mouse_event = dynamic_cast<cocos2d::EventMouse*>(event);
@@ -119,7 +122,7 @@ void animals::on_mouse_click(cocos2d::Event* event)
     }
 }
 
-// ι��
+// 喂食
 void animals::feed()
 {
     if (feed_today) {
@@ -131,22 +134,24 @@ void animals::feed()
         CCLOG("couldn't feed today");
 }
 
-// ���ɸ���Ʒ
+// 生成附属品
 void animals::create_produce()
 {
-    if (feed_count % produce_day == 0 && feed_count)
+    if (!_model) return;
+
+    if (feed_count % _model->produceCycle == 0 && feed_count)
     {
-        produce->setSpriteFrame(animals_name + "-produce.png");//��ʾ������
+        produce->setSpriteFrame(_model->id + "-produce.png");//��ʾ������
         is_produce = 1;
-        CCLOG("create produce");
+        CCLOG("create produce: %s", (_model->id + "-produce.png").c_str());
     }
 }
 
-// �ջ���
+// 收获功能
 void animals::harvest()
 {
-    //����������뱳��,����þ���ֵ
-    backpackLayer->addItem(PRODUCE_MAP.at(animals_name));
+    //backpackLayer->addItem(PRODUCE_MAP.at(animals_name));
+    backpackLayer->addItem(_model->produceItem);
     Player* player = Player::getInstance("me");
     player->playerproperty.addExperience(EXPERIENCE);
     produce->setTexture(transparent_texture);
@@ -154,9 +159,10 @@ void animals::harvest()
 }
 
 
-// �ε�
+// 游荡
 void animals::randmove(cocos2d::TMXTiledMap* tileMap)
 {
+    //这里的随机比较复杂，可以考虑更改
     unsigned int timestamp = static_cast<unsigned int>(time(0)) * 1000 + static_cast<unsigned int>(clock()) / (CLOCKS_PER_SEC / 1000);
 
     // ��ȡ����ID�����̼�Ĳ��죩
@@ -184,7 +190,7 @@ void animals::randmove(cocos2d::TMXTiledMap* tileMap)
 
 }
 
-// �ƶ�����
+// 移动动作
 void animals::move_act(cocos2d::TMXTiledMap* tileMap)
 {
     for (int i = 0; i < 4; i++) {
@@ -220,8 +226,9 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
     for (int i = 0; i < 4; i++) {
         if (movement[i] && !is_hit_edge[i]) {
             //�����ƶ�����
-            std::string dic[4] = { "-back","-front","-left","-right" };
-            this->setSpriteFrame(animals_name + dic[i] + ".png");
+            std::string dirStr[4] = { "-back","-front","-left","-right" };
+            this->setSpriteFrame(_model->id + dirStr[i] + ".png");
+            //this->setSpriteFrame(animals_name + dic[i] + ".png");
             auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[i], move_vecy[i]));
             this->runAction(move_action);
         }
@@ -233,26 +240,24 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
 
 }
 
-// ����ʱ�ε�
+// 开启随机移动调度器
 void animals::scheduleRandomMove(cocos2d::TMXTiledMap* tileMap) {
 
-    // ÿ5������ƶ�һ��
     this->schedule([this, tileMap](float dt) {
         randmove(tileMap);
         }, 5.0f, "random_move_key");
 
 }
 
-// ��һ��ĸ���
+// 新一天更新
 void animals::update_day(float deltaTime)
 {
-    if (timeSystem->getDay() != now_day)//���������
+    if (timeSystem->getDay() != now_day)
     {
-        if (animals_name != "") {
-            if (feed_today == 0)//˵������ι�������ﵽҪ��
+        if (_model) {
+            if (feed_today == 0)// 说明今天喂过了
             {
                 feed_count++;
-                //�鿴�Ƿ���Ҫ���³ɳ�״̬
                 this->create_produce();
             }
         }
@@ -284,8 +289,8 @@ void AnimalsManager::schedule_animals()
 {
     // �������������ʾ���
     for (auto it = animals_list.begin(); it != animals_list.end(); ++it) {
-        auto animal = *it;                      // ��ȡָ�룬ָ����
-        animal->schedule([animal](float dt) {   // ����ָ�� animal
+        auto animal = *it;                      
+        animal->schedule([animal](float dt) {   
             animal->update(dt); 
             }, "update_animal");
     }

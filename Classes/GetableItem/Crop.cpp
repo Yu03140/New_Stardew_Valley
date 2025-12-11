@@ -2,40 +2,40 @@
 #include "InteractionManager.h"
 #include "StrategyContext.h"
 
-//¶¨Òå³£Á¿
+//å®šä¹‰å¸¸é‡
 #define MAG_TIME_CROP 1.5f
-// ¶¨Òå¾²Ì¬³ÉÔ±±äÁ¿²¢³õÊ¼»¯
+// å®šä¹‰é™æ€æˆå‘˜å˜é‡å¹¶åˆå§‹åŒ–
 cocos2d::Texture2D* crop::transparent_texture = nullptr;
 cocos2d::Size crop::crop_size = cocos2d::Size(0, 0);
 
-// ´´½¨ÊµÀý
+// åˆ›å»ºå®žä¾‹
 crop* crop::create(const std::string& plist_name, float width, float height)
 {
-    //¼ÓÔØplistÎÄ¼þ
+    //åŠ è½½plistæ–‡ä»¶
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
     crop_size.width = width;
     crop_size.height = height;
 
-    //´´½¨ÊµÀý
+    //åˆ›å»ºå®žä¾‹
     crop* crop_sprite = new crop();
 
-    // ´´½¨Í¸Ã÷µÄÄÚ´æ¿é£¬ÉèÖÃÎªÈ«Í¸Ã÷ (RGBA8888 ¸ñÊ½)
-    int dataSize = width * height * 4;  // Ã¿¸öÏñËØ 4 ×Ö½Ú£¨RGBA ¸ñÊ½£©
+    // åˆ›å»ºé€æ˜Žçš„å†…å­˜å—ï¼Œè®¾ç½®ä¸ºå…¨é€æ˜Ž (RGBA8888 æ ¼å¼)
+    int dataSize = width * height * 4;  // æ¯ä¸ªåƒç´  4 å­—èŠ‚ï¼ˆRGBA æ ¼å¼ï¼‰
     unsigned char* transparentData = new unsigned char[dataSize];
 
-    // Ìî³äÍ¸Ã÷Êý¾Ý (Ã¿¸öÏñËØµÄ 4 ¸öÍ¨µÀÖµ¶¼Îª 0)
+    // å¡«å……é€æ˜Žæ•°æ® (æ¯ä¸ªåƒç´ çš„ 4 ä¸ªé€šé“å€¼éƒ½ä¸º 0)
     memset(transparentData, 0, dataSize);
 
-    // ´´½¨Í¸Ã÷ÎÆÀí
+    // åˆ›å»ºé€æ˜Žçº¹ç†
     cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, width, height, cocos2d::Size(width, height));
     transparent_texture = transparentTexture;
 
-    // ÊÍ·ÅÄÚ´æ
+    // é‡Šæ”¾å†…å­˜
     delete[] transparentData;
 
 
-    //ÅÐ¶ÏÊÇ·ñÄÜ³É¹¦´´½¨
+    //åˆ¤æ–­æ˜¯å¦èƒ½æˆåŠŸåˆ›å»º
     if (transparentTexture)
     {
         crop_sprite->initWithTexture(transparentTexture);
@@ -49,24 +49,24 @@ crop* crop::create(const std::string& plist_name, float width, float height)
     return nullptr;
 }
 
-//// ³õÊ¼»¯Êó±ê¼àÌýÆ÷
+//// åˆå§‹åŒ–é¼ æ ‡ç›‘å¬å™¨
 //void crop::init_mouselistener()
 //{
-//    // ´´½¨Êó±ê¼àÌýÆ÷
+//    // åˆ›å»ºé¼ æ ‡ç›‘å¬å™¨
 //    auto listener = cocos2d::EventListenerMouse::create();
 //
-//    // Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+//    // é¼ æ ‡æŒ‰ä¸‹æ—¶çš„å›žè°ƒ
 //    listener->onMouseDown = CC_CALLBACK_1(crop::on_mouse_click, this);
-//    // »ñÈ¡ÊÂ¼þ·Ö·¢Æ÷£¬Ìí¼Ó¼àÌýÆ÷
+//    // èŽ·å–äº‹ä»¶åˆ†å‘å™¨ï¼Œæ·»åŠ ç›‘å¬å™¨
 //    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 //}
-//// Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+//// é¼ æ ‡æŒ‰ä¸‹æ—¶çš„å›žè°ƒ
 //void crop::on_mouse_click(cocos2d::Event* event)
 //{
 //    /*------------------------------------------------------renew-------------------------------------------------------------*/
-//    //»ñÈ¡×÷ÎïÎ»ÖÃ
+//    //èŽ·å–ä½œç‰©ä½ç½®
 //    Vec2 crop_pos = this->convertToWorldSpace(Vec2(0, 0));
-//    // ¼ÆËãµã»÷µÄÓÐÐ§·¶Î§
+//    // è®¡ç®—ç‚¹å‡»çš„æœ‰æ•ˆèŒƒå›´
 //    float min_x = crop_pos.x;
 //    float max_x = crop_pos.x + crop_size.width * MapSize;
 //    float min_y = crop_pos.y;
@@ -80,15 +80,15 @@ crop* crop::create(const std::string& plist_name, float width, float height)
 //            CCLOG("click crop:%d", develop_level);
 //            switch (develop_level)
 //            {
-//            case -1: //×÷Îï¿ÝÎ®£¬µã»÷²ù³ý
+//            case -1: //ä½œç‰©æž¯èŽï¼Œç‚¹å‡»é“²é™¤
 //                CCLOG("clear the dead crop");
 //                this->clear();
 //                break;
-//            case 5: //×÷Îï³ÉÊì£¬µã»÷ÊÕ»ñ
+//            case 5: //ä½œç‰©æˆç†Ÿï¼Œç‚¹å‡»æ”¶èŽ·
 //                CCLOG("harvest the crop");
 //                this->harvest();
-//            case 0://´ËÊ±Îª¿ÕµØ
-//                if (CROP_MAP.count(backpackLayer->getSelectedItem())) //ÊÖÉÏÄÃµÄÎïÆ·ÊÇÖ²ÎïÖÖ×Ó
+//            case 0://æ­¤æ—¶ä¸ºç©ºåœ°
+//                if (CROP_MAP.count(backpackLayer->getSelectedItem())) //æ‰‹ä¸Šæ‹¿çš„ç‰©å“æ˜¯æ¤ç‰©ç§å­
 //                {
 //                    CCLOG("plant a crop");
 //                    this->planting(backpackLayer->getSelectedItem());
@@ -98,12 +98,12 @@ crop* crop::create(const std::string& plist_name, float width, float height)
 //            case 2:
 //            case 3:
 //            case 4:
-//                if (backpackLayer->getSelectedItem().find("Can") != std::string::npos) //ÊÖÉÏµÄ¹¤¾ßÎªË®ºø£¬Ö´ÐÐ½½Ë®
+//                if (backpackLayer->getSelectedItem().find("Can") != std::string::npos) //æ‰‹ä¸Šçš„å·¥å…·ä¸ºæ°´å£¶ï¼Œæ‰§è¡Œæµ‡æ°´
 //                {
 //                    CCLOG("water this crop");
 //                    this->water(backpackLayer->getSelectedItem());
 //                }
-//                else if (backpackLayer->getSelectedItem().find("fertilizer") != std::string::npos)//ÊÖÉÏµÄ¹¤¾ßÎª·ÊÁÏ£¬Ö´ÐÐÊ©·Ê
+//                else if (backpackLayer->getSelectedItem().find("fertilizer") != std::string::npos)//æ‰‹ä¸Šçš„å·¥å…·ä¸ºè‚¥æ–™ï¼Œæ‰§è¡Œæ–½è‚¥
 //                {
 //                    CCLOG("fertilize this crop");
 //                    this->fertilize(backpackLayer->getSelectedItem());
@@ -122,22 +122,22 @@ crop* crop::create(const std::string& plist_name, float width, float height)
 //    }
 //}
 
-//½½Ë®,¸ù¾Ý¹¤¾ßµÈ¼¶£¬¹¤¾ßµÈ¼¶Ô½¸ß£¬½½Ò»´ÎË®µÄÓÐÐ§´ÎÊýÔ½¶à
+//æµ‡æ°´,æ ¹æ®å·¥å…·ç­‰çº§ï¼Œå·¥å…·ç­‰çº§è¶Šé«˜ï¼Œæµ‡ä¸€æ¬¡æ°´çš„æœ‰æ•ˆæ¬¡æ•°è¶Šå¤š
 void crop::water(std::string name)
 {
-    if (watered_today)//Èç¹û½ñÌì»¹ÓÐ½½Ë®´ÎÊý
+    if (watered_today)//å¦‚æžœä»Šå¤©è¿˜æœ‰æµ‡æ°´æ¬¡æ•°
     {
         char last_char = name[name.size() - 1];
         int level = last_char - '0';
         watered_today = std::min(watered_today - level, 0);
         this->setSpriteFrame("water.png");
 
-        // ÔÚ 0.2 Ãëºó»Ö¸´Ô­Í¼
+        // åœ¨ 0.2 ç§’åŽæ¢å¤åŽŸå›¾
         this->scheduleOnce([this](float dt) {
             this->setSpriteFrame(crop_name + "-" + std::to_string(this->develop_level) + ".png");
             }, 0.2f, "reset_texture_crop");
 
-        //±³°üË®-1
+        //èƒŒåŒ…æ°´-1
         backpackLayer->removeItem(name);
         CCLOG("water successfully");
     }
@@ -145,18 +145,18 @@ void crop::water(std::string name)
         CCLOG("couldn't water today");
 }
 
-//ÖÖÖ²
+//ç§æ¤
 void crop::planting(std::string name) {
-    if (CROP_MAP.at(name).at("season") == timeSystem->getSeason()) //´ËÊ±ÊÇÖÖÖ²Õâ¸ö×÷ÎïµÄ¼¾½Ú
+    if (CROP_MAP.at(name).at("season") == timeSystem->getSeason()) //æ­¤æ—¶æ˜¯ç§æ¤è¿™ä¸ªä½œç‰©çš„å­£èŠ‚
     {
         crop_name = name;
         develop_level = 1;
         develop_day = CROP_MAP.at(name).at("develop_day");
-        std::string framename = this->crop_name + "-1.png";//ÏÔÊ¾µÚÒ»½×¶ÎÖÖÖ²Í¼Æ¬£¬±íÊ¾ÖÖÖ²³É¹¦
+        std::string framename = this->crop_name + "-1.png";//æ˜¾ç¤ºç¬¬ä¸€é˜¶æ®µç§æ¤å›¾ç‰‡ï¼Œè¡¨ç¤ºç§æ¤æˆåŠŸ
         this->setSpriteFrame(framename);
         this->setScale(MAG_TIME_CROP);
 
-        //±³°üÀïÖÖ×Ó-1
+        //èƒŒåŒ…é‡Œç§å­-1
         backpackLayer->removeItem(name);
         CCLOG("plant successfully");
     }
@@ -164,7 +164,7 @@ void crop::planting(std::string name) {
         CCLOG("the crop couldn't be planted in this season");
 }
 
-//Ê©·Ê,Éú³¤½ø¶È++£¬¸ù¾Ý¹¤¾ßµÈ¼¶£¬¹¤¾ßµÈ¼¶Ô½¸ß£¬Éú³¤½ø¶ÈÔö¼ÓÔ½¶à
+//æ–½è‚¥,ç”Ÿé•¿è¿›åº¦++ï¼Œæ ¹æ®å·¥å…·ç­‰çº§ï¼Œå·¥å…·ç­‰çº§è¶Šé«˜ï¼Œç”Ÿé•¿è¿›åº¦å¢žåŠ è¶Šå¤š
 void crop::fertilize(std::string name)
 {
     char last_char = name[name.size() - 1];
@@ -173,24 +173,24 @@ void crop::fertilize(std::string name)
     std::string framename = this->crop_name + "-" + std::to_string(this->develop_level) + ".png";
     this->setSpriteFrame(framename);
 
-    //±³°üÀï·ÊÁÏ-1
+    //èƒŒåŒ…é‡Œè‚¥æ–™-1
     backpackLayer->removeItem(name);
     CCLOG("fertilize successfully");
 }
 
-//·áÊÕ£¬Ã¿´ÎÊÕ»ñÔö¼ÓEXPERIENCE¾­ÑéÖµ
+//ä¸°æ”¶ï¼Œæ¯æ¬¡æ”¶èŽ·å¢žåŠ EXPERIENCEç»éªŒå€¼
 void crop::harvest()
 {
-    //°ÑÉú³ÉÎï¼ÓÈë±³°ü 
+    //æŠŠç”Ÿæˆç‰©åŠ å…¥èƒŒåŒ… 
     backpackLayer->addItem(HARVEST_MAP.at(crop_name));
-    //ÈËÎï¾­ÑéÔö¼Ó10
+    //äººç‰©ç»éªŒå¢žåŠ 10
     Player* player = Player::getInstance("me");
     player->playerproperty.addExperience(EXPERIENCE);
-    //Çå¿ÕÍÁµØ
+    //æ¸…ç©ºåœŸåœ°
     this->clear();
 }
 
-//Çå³ý
+//æ¸…é™¤
 void crop::clear()
 {
     water_count = 0;
@@ -202,14 +202,14 @@ void crop::clear()
     this->initWithTexture(transparent_texture);
 }
 
-//¸üÐÂ
+//æ›´æ–°
 void crop::update_day(float deltaTime)
 {
-    if (timeSystem->getDay() != now_day)//½ñÌì½áÊøÁË
+    if (timeSystem->getDay() != now_day)//ä»Šå¤©ç»“æŸäº†
     {
 
         if (develop_level > 0) {
-            if (watered_today)//ËµÃ÷½ñÌì½½Ë®´ÎÊýÃ»ÓÐ´ïµ½ÒªÇó
+            if (watered_today)//è¯´æ˜Žä»Šå¤©æµ‡æ°´æ¬¡æ•°æ²¡æœ‰è¾¾åˆ°è¦æ±‚
             {
                 CCLOG("unwater today");
                 unwater_count++;
@@ -219,14 +219,14 @@ void crop::update_day(float deltaTime)
                     CCLOG("the crop die");
                 }
             }
-            else//½ñÌì½½Ë®´ïµ½ÒªÇó
+            else//ä»Šå¤©æµ‡æ°´è¾¾åˆ°è¦æ±‚
             {
                 CCLOG("water successfully today:%d", water_count);
                 water_count++;
-                //²é¿´ÊÇ·ñÐèÒª¸üÐÂ³É³¤×´Ì¬
+                //æŸ¥çœ‹æ˜¯å¦éœ€è¦æ›´æ–°æˆé•¿çŠ¶æ€
                 if (water_count > develop_level * develop_day && water_count <= MAX_LEVEL * develop_day) {
                     this->develop_level++;
-                    //¸üÐÂÏÔÊ¾µÄ³É³¤×´Ì¬
+                    //æ›´æ–°æ˜¾ç¤ºçš„æˆé•¿çŠ¶æ€
                     std::string framename = this->crop_name + "-" + std::to_string(this->develop_level) + ".png";
                     this->setSpriteFrame(framename);
                 }
@@ -237,8 +237,8 @@ void crop::update_day(float deltaTime)
     }
 }
 
-//¡¾¹Û²ìÕßÄ£Ê½¡¿
-// ×Ô¶¯×¢²á
+//ã€è§‚å¯Ÿè€…æ¨¡å¼ã€‘
+// è‡ªåŠ¨æ³¨å†Œ
 void crop::onEnter() {
     CCLOG("[Crop] onEnter called for crop %p", this);
     Sprite::onEnter();
@@ -247,7 +247,7 @@ void crop::onEnter() {
     CCLOG("[Crop] Crop %p registration completed", this);
 }
 
-// ×Ô¶¯×¢Ïú
+// è‡ªåŠ¨æ³¨é”€
 void crop::onExit() {
     CCLOG("[Crop] onExit called for crop %p", this);
     CCLOG("[Crop] Unregistering crop %p from InteractionManager", this);
@@ -256,11 +256,11 @@ void crop::onExit() {
     CCLOG("[Crop] Crop %p unregistration completed", this);
 }
 
-// Ìæ´úÔ­À´µÄÎ»ÖÃ¼ÆËã
+// æ›¿ä»£åŽŸæ¥çš„ä½ç½®è®¡ç®—
 cocos2d::Rect crop::getBoundingBoxWorld() {
-    // »ñÈ¡ÊÀ½ç×ø±êÔ­µã
+    // èŽ·å–ä¸–ç•Œåæ ‡åŽŸç‚¹
     Vec2 worldPos = this->convertToWorldSpace(Vec2::ZERO);
-    // Ê¹ÓÃ MapSize ½øÐÐ·Å´ó (±£³ÖÄãÔ­ÓÐµÄÂß¼­)
+    // ä½¿ç”¨ MapSize è¿›è¡Œæ”¾å¤§ (ä¿æŒä½ åŽŸæœ‰çš„é€»è¾‘)
     cocos2d::Rect bbox = cocos2d::Rect(
         worldPos.x,
         worldPos.y,
@@ -272,50 +272,50 @@ cocos2d::Rect crop::getBoundingBoxWorld() {
     return bbox;
 }
 
-//¡¾Ô­ÓÐÂß¼­¡¿
-// ºËÐÄÒµÎñÂß¼­ (ÍêÈ«È¥³ýÁË×ø±êÅÐ¶ÏºÍ±³°ü²éÕÒ)
+//ã€åŽŸæœ‰é€»è¾‘ã€‘
+// æ ¸å¿ƒä¸šåŠ¡é€»è¾‘ (å®Œå…¨åŽ»é™¤äº†åæ ‡åˆ¤æ–­å’ŒèƒŒåŒ…æŸ¥æ‰¾)
 //bool crop::onInteract(const InteractContext& ctx) {
 //    CCLOG("[Crop] onInteract called for crop %p", this);
 //    CCLOG("[Crop] Context - isInControl: %s, toolName: '%s', toolLevel: %d, develop_level: %d", 
 //          ctx.isInControl ? "true" : "false", ctx.toolName.c_str(), ctx.toolLevel, develop_level);
 //    
-//    // 1. ±ØÐëÔÚ¿ØÖÆ·¶Î§ÄÚ
+//    // 1. å¿…é¡»åœ¨æŽ§åˆ¶èŒƒå›´å†…
 //    if (!ctx.isInControl) {
 //        CCLOG("[Crop] Interaction rejected - not in control range");
 //        return false;
 //    }
 //
-//    // ¸¨Öú lambda£ºÖØÐÂÆ´´Õ¹¤¾ßÈ«Ãû (ÀýÈç "Can" + 1 -> "Can1")
-//    // ÄãµÄ¾Éº¯ÊýÒÀÀµÕâ¸öÈ«ÃûÀ´½âÎöµÈ¼¶ºÍ¿Û³ý±³°üÎïÆ·
+//    // è¾…åŠ© lambdaï¼šé‡æ–°æ‹¼å‡‘å·¥å…·å…¨å (ä¾‹å¦‚ "Can" + 1 -> "Can1")
+//    // ä½ çš„æ—§å‡½æ•°ä¾èµ–è¿™ä¸ªå…¨åæ¥è§£æžç­‰çº§å’Œæ‰£é™¤èƒŒåŒ…ç‰©å“
 //    auto getFullToolName = [&]() -> std::string {
 //        return ctx.toolName + std::to_string(ctx.toolLevel);
 //        };
 //
 //    switch (develop_level) {
-//    case -1: // ¿ÝÎ®
+//    case -1: // æž¯èŽ
 //        CCLOG("[Crop] Handling withered crop - clearing");
 //        //CCLOG("clear the dead crop");
-//        this->clear(); // Ö±½Óµ÷ÓÃÏÖÓÐº¯Êý
+//        this->clear(); // ç›´æŽ¥è°ƒç”¨çŽ°æœ‰å‡½æ•°
 //        break;
 //
-//    case 5: // ÊÕ»ñ
+//    case 5: // æ”¶èŽ·
 //        CCLOG("[Crop] Handling mature crop - harvesting");
 //        //CCLOG("harvest the crop");
-//        this->harvest(); // Ö±½Óµ÷ÓÃÏÖÓÐº¯Êý
+//        this->harvest(); // ç›´æŽ¥è°ƒç”¨çŽ°æœ‰å‡½æ•°
 //        break;
 //
-//    case 0: // ¿ÕµØ£ºÖÖÖ²
+//    case 0: // ç©ºåœ°ï¼šç§æ¤
 //        CCLOG("[Crop] Handling empty soil - checking for planting");
-//        // ÖÖ×Ó±È½ÏÌØÊâ£¬Ëü²»ÔÚ ctx.toolName (ÒòÎªÄÇÖ»´æ¹¤¾ß)£¬
-//        // ËùÒÔÎÒÃÇÕâÀï»¹ÊÇÐèÒª·ÃÎÊ±³°ü»ñÈ¡µ±Ç°ÄÃµÄÎïÆ·È«Ãû
+//        // ç§å­æ¯”è¾ƒç‰¹æ®Šï¼Œå®ƒä¸åœ¨ ctx.toolName (å› ä¸ºé‚£åªå­˜å·¥å…·)ï¼Œ
+//        // æ‰€ä»¥æˆ‘ä»¬è¿™é‡Œè¿˜æ˜¯éœ€è¦è®¿é—®èƒŒåŒ…èŽ·å–å½“å‰æ‹¿çš„ç‰©å“å…¨å
 //        if (backpackLayer && !backpackLayer->getSelectedItem().empty()) {
 //            std::string currentItem = backpackLayer->getSelectedItem();
 //            CCLOG("[Crop] Current selected item: '%s'", currentItem.c_str());
-//            // ¼ì²éÊÇ·ñÊÇÖÖ×Ó
+//            // æ£€æŸ¥æ˜¯å¦æ˜¯ç§å­
 //            if (CROP_MAP.count(currentItem)) {
 //                CCLOG("[Crop] Item is a valid seed - planting");
 //                //CCLOG("plant a crop");
-//                this->planting(currentItem); // Ö±½Óµ÷ÓÃÏÖÓÐº¯Êý
+//                this->planting(currentItem); // ç›´æŽ¥è°ƒç”¨çŽ°æœ‰å‡½æ•°
 //            } else {
 //                CCLOG("[Crop] Item is not a valid seed");
 //            }
@@ -324,23 +324,23 @@ cocos2d::Rect crop::getBoundingBoxWorld() {
 //        }
 //        break;
 //
-//    case 1: case 2: case 3: case 4: // ³É³¤½×¶Î
+//    case 1: case 2: case 3: case 4: // æˆé•¿é˜¶æ®µ
 //        CCLOG("[Crop] Handling growing crop - checking tool type");
 //        if (ctx.toolName == "Can") {
-//            // ÕâÀïµÄÅÐ¶ÏÒÆµ½ÁË water º¯ÊýÄÚ²¿£¬µ«ÎÒÃÇÔÚÍâ²¿×öÒ»¸ö¼òµ¥µÄ¹¤¾ßÀàÐÍ¼ì²é
+//            // è¿™é‡Œçš„åˆ¤æ–­ç§»åˆ°äº† water å‡½æ•°å†…éƒ¨ï¼Œä½†æˆ‘ä»¬åœ¨å¤–éƒ¨åšä¸€ä¸ªç®€å•çš„å·¥å…·ç±»åž‹æ£€æŸ¥
 //            CCLOG("[Crop] Tool is watering can - attempting to water");
 //            //CCLOG("water this crop");
-//            // ´«ÈëÆ´´ÕºÃµÄÃû×Ö "Can1"
+//            // ä¼ å…¥æ‹¼å‡‘å¥½çš„åå­— "Can1"
 //            this->water(getFullToolName());
 //        }
 //        else if (ctx.toolName == "fertilizer") {
 //            CCLOG("[Crop] Tool is fertilizer - attempting to fertilize");
 //            //CCLOG("fertilize this crop");
-//            // ´«ÈëÆ´´ÕºÃµÄÃû×Ö "fertilizer1"
+//            // ä¼ å…¥æ‹¼å‡‘å¥½çš„åå­— "fertilizer1"
 //            this->fertilize(getFullToolName());
 //        }
 //        else {
-//            // Èç¹ûÊÇÆäËû¹¤¾ß£¨±ÈÈç³úÍ·µãµ½ÁË×÷Îï£©£¬ÕâÀï¿ÉÒÔ¼Ó¸öÈÕÖ¾»òÕßÊ²Ã´¶¼²»×ö
+//            // å¦‚æžœæ˜¯å…¶ä»–å·¥å…·ï¼ˆæ¯”å¦‚é”„å¤´ç‚¹åˆ°äº†ä½œç‰©ï¼‰ï¼Œè¿™é‡Œå¯ä»¥åŠ ä¸ªæ—¥å¿—æˆ–è€…ä»€ä¹ˆéƒ½ä¸åš
 //            CCLOG("[Crop] Tool '%s' cannot be used on growing crops", ctx.toolName.c_str());
 //            //CCLOG("%s couldn't do anything to the crop", ctx.toolName.c_str());
 //        }
@@ -355,12 +355,12 @@ cocos2d::Rect crop::getBoundingBoxWorld() {
 //    CCLOG("[Crop] onInteract completed successfully for crop %p", this);
 //    return true;
 //}
-//¡¾²ßÂÔÄ£Ê½¡¿
+//ã€ç­–ç•¥æ¨¡å¼ã€‘
 bool crop::onInteract(const InteractContext& ctx) {
     if (!ctx.isInControl) return false;
 
-    // ÌØÊâ´¦ÀíÖÖÖ² (ÒòÎªÖÖÖ²²»ÐèÒªµã»÷ÒÑÓÐµÄ crop£¬¶øÊÇµã»÷¿ÕµØ£¬ÇÒÅÐ¶¨Âß¼­ÒÀÀµ¾ßÌåµÄÖÖ×Ó±í)
-    // Èç¹ûÊÇ¿ÕµØ (level 0) ÇÒÊÖ³ÖÖÖ×Ó£¬ÕâÀï±£ÁôÔ­ÓÐÂß¼­»òÐ´Ò»¸ö PlantingStrategy
+    // ç‰¹æ®Šå¤„ç†ç§æ¤ (å› ä¸ºç§æ¤ä¸éœ€è¦ç‚¹å‡»å·²æœ‰çš„ cropï¼Œè€Œæ˜¯ç‚¹å‡»ç©ºåœ°ï¼Œä¸”åˆ¤å®šé€»è¾‘ä¾èµ–å…·ä½“çš„ç§å­è¡¨)
+    // å¦‚æžœæ˜¯ç©ºåœ° (level 0) ä¸”æ‰‹æŒç§å­ï¼Œè¿™é‡Œä¿ç•™åŽŸæœ‰é€»è¾‘æˆ–å†™ä¸€ä¸ª PlantingStrategy
     if (develop_level == 0) {
         if (backpackLayer && CROP_MAP.count(backpackLayer->getSelectedItem())) {
             this->planting(backpackLayer->getSelectedItem());
@@ -368,6 +368,6 @@ bool crop::onInteract(const InteractContext& ctx) {
         }
     }
 
-    // ÆäËûËùÓÐÂß¼­Î¯ÍÐ¸ø²ßÂÔ¹ÜÀíÆ÷
+    // å…¶ä»–æ‰€æœ‰é€»è¾‘å§”æ‰˜ç»™ç­–ç•¥ç®¡ç†å™¨
     return InteractionStrategyContext::getInstance()->handleInteraction(ctx, this);
 }
