@@ -8,6 +8,7 @@
 #include "cocos2d.h"
 #include "Global/Global.h"
 #include "progress_bar.h"
+#include "IInteractable.h"
 
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 80
@@ -27,7 +28,7 @@ const std::unordered_map<std::string, int> GOODS_CLICK_MAP =
 	{"grass",3 * 2},{"stones",5 * 2},{"bigstone",10 * 2},{"mine",15 * 2},{"tree",10 * 2},{"badGreenhouse", 30 * 2}
 };
 
-class getable_goods : public cocos2d::Sprite
+class getable_goods : public cocos2d::Sprite, public IInteractable
 {
 private:
 	Size sprite_size;
@@ -44,10 +45,30 @@ public:
 	virtual void setImag();
 
 	bool get_is_getable() { return is_getable; }
-	// 初始化鼠标监听器
-	void init_mouselistener();
-	// 鼠标按下时的回调
-	void on_mouse_click(cocos2d::Event* event);
+	//// 初始化鼠标监听器
+	//void init_mouselistener();
+	//// 鼠标按下时的回调
+	//void on_mouse_click(cocos2d::Event* event);
+	// 【观察者模式】
+	// 【实现 IInteractable 接口】
+	virtual cocos2d::Rect getBoundingBoxWorld() override;
+	virtual int getInteractPriority() override { return 10; } // 赋予更高的优先级，以处理重叠，比如石头盖在草上
+	virtual bool onInteract(const InteractContext& ctx) override;
+	virtual bool isInteractable() override { return is_getable; } // 只有可获取时才可交互
+
+	// 【Cocos2d-x 生命周期】 (用于自动注册)
+	virtual void onEnter() override;
+	virtual void onExit() override;
+	//============================
+	// 【策略模式】（所需内容获取）
+	std::string getRequiredTool() const {
+		if (GOODS_MAP.find(sprite_name) != GOODS_MAP.end()) {
+			return GOODS_MAP.at(sprite_name).at("tool");
+		}
+		return "";
+	}
+	//【策略模式】（封装一下逻辑）
+	void processToolHit(int power);
 	void show_click_bar();
 	void hide_click_bar();
 	virtual void update();

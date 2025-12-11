@@ -1,6 +1,7 @@
 // MinesSceneFactory.cpp
 #include "MinesSceneFactory.h"
 #include "GetableItem/getable_goods.h"
+#include "GetableItem/InteractionManager.h"
 
 USING_NS_CC;
 
@@ -209,8 +210,10 @@ void MinesSceneProduct::setupPlayer() {
             sprite_tool->setPosition(Vec2(visibleSize.width / 2 + origin.x + scaledSize.width / 2,
                 visibleSize.height / 2 + origin.y));
             this->addChild(sprite_tool, 1);
+            // 【观察者模式】将场景成员变量赋给全局变量
+            ::sprite_tool = sprite_tool;
             sprite_tool->init_keyboardlistener();
-            sprite_tool->init_mouselistener();
+            //sprite_tool->init_mouselistener();
             // 创建局部变量用于 lambda 捕获，避免捕获 this 指针
             auto spriteToolPtr = sprite_tool;
             sprite_tool->schedule([spriteToolPtr](float dt) {
@@ -242,6 +245,11 @@ void MinesSceneProduct::onEnter() {
     // 关键修复1：重新初始化鼠标和键盘监听器（场景切换后需要重新注册）
     initMouseListener();
     initKeyboardListener();
+
+    // --- 【观察者模式】启动 InteractionManager ---
+    InteractionManager::getInstance()->startListening(this->getEventDispatcher());
+    CCLOG("[MinesScene] InteractionManager started listening.");
+    // --------------------------------------------------------
     
     // 设置非农场场景标志
     is_infarm = 0;
@@ -290,16 +298,17 @@ void MinesSceneProduct::onEnter() {
         }, 0.0f, "reinit_player_keyboard");
     }
     
-    // 关键修复5：重新初始化工具精灵的鼠标监听器
-    if (sprite_tool) {
-        // 使用scheduleOnce延迟一帧，确保精灵的onEnter()已经执行
-        this->scheduleOnce([this](float dt) {
-            if (sprite_tool && sprite_tool->getParent()) {
-                sprite_tool->init_mouselistener();
-                CCLOG("Tool sprite mouse listener reinitialized in MinesScene onEnter");
-            }
-        }, 0.0f, "reinit_tool_mouse");
-    }
+    //// 关键修复5：重新初始化工具精灵的鼠标监听器
+    //if (sprite_tool) {
+    //    // 使用scheduleOnce延迟一帧，确保精灵的onEnter()已经执行
+    //    this->scheduleOnce([this](float dt) {
+    //        if (sprite_tool && sprite_tool->getParent()) {
+    //            sprite_tool->init_mouselistener();
+    //            CCLOG("Tool sprite mouse listener reinitialized in MinesScene onEnter");
+    //        }
+    //    }, 0.0f, "reinit_tool_mouse");
+    //}
+
 }
 
 //----------------------------------------------------
@@ -323,6 +332,11 @@ void MinesSceneProduct::onExit() {
     
     // 注意：scheduleUpdate() 注册的更新会在 Scene::onExit() 中自动清理
     // 不需要手动调用 unscheduleUpdate()
+
+    // --- 【观察者模式】停止 InteractionManager ---
+    InteractionManager::getInstance()->stopListening(this->getEventDispatcher());
+    CCLOG("[MinesScene] InteractionManager stopped listening.");
+    // --------------------------------------------------------
     
     SceneBase::onExit();
 }
@@ -369,6 +383,16 @@ void MinesSceneProduct::onMouseClick(Event* event) {
             mouse_pos.y < playerPos.y + CONTROL_RANGE) {
             is_in_control = 1;
             CCLOG("Mouse click in control range (MinesScene), is_in_control set to 1");
+            
+            // 【观察者模式：如果点在控制范围内，立即播放工具动画】
+            // 确保 ::sprite_tool 已在 Global.h/cpp 中声明和 FarmSceneProduct::setupPlayer 中赋值
+            if (::sprite_tool && !::sprite_tool->get_sprite_name_tool().empty()) {
+                // 假设 moveable_sprite_key_tool::get_selected_item_name() 存在
+                // 或者我们直接调用 playClickAnimation()，让它自己检查是否有选中工具。
+                ::sprite_tool->playClickAnimation();
+                CCLOG("Tool animation played due to control range click.");
+            }
+        
         } else {
             is_in_control = 0;
         }

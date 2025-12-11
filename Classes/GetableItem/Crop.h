@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "Global/Global.h"
+#include "IInteractable.h"
 
 #define MAX_LEVEL 5
 #define DIE_DRY 4
@@ -27,7 +28,7 @@ const std::unordered_map<std::string, std::string> HARVEST_MAP =
     {"pumpkin","sunflour_fruit"}
 };
 
-class crop : public cocos2d::Sprite
+class crop : public cocos2d::Sprite, public IInteractable
 {
 private:
     int now_day = 0;                             //当前日期
@@ -44,8 +45,9 @@ private:
 public:
     
     static crop* create(const std::string& plist_name, float width, float height);  // 创建实例 
-    void init_mouselistener();                                                      // 初始化鼠标监听器
-    void on_mouse_click(cocos2d::Event* event);                                     // 鼠标按下时的回调 
+    //【原有逻辑】
+    //void init_mouselistener();                                                      // 初始化鼠标监听器
+    //void on_mouse_click(cocos2d::Event* event);                                     // 鼠标按下时的回调 
     void planting(std::string name);                                                // 种植功能
     void water(std::string name);                                                   // 浇水功能的实现
 	void fertilize(std::string name); 											    // 施肥功能的实现
@@ -53,6 +55,13 @@ public:
     void harvest();                                                                 // 收获功能
     void update_day(float deltaTime);                                               // 新一天的更新
     void deinsectization();                                                         // 除虫
-
+    //【观察者模式】
+    virtual cocos2d::Rect getBoundingBoxWorld() override;
+    virtual bool onInteract(const InteractContext& ctx) override;
+    virtual bool isInteractable() override { return true; } // 作物总是可见的
+    virtual void onEnter() override;
+    virtual void onExit() override;
+    //【策略模式】（所需返回内容）
+    int getDevelopLevel() const { return develop_level; }
 };
 #endif __CROP_H__
