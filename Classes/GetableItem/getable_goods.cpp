@@ -1,5 +1,6 @@
 #include "getable_goods.h"
 #include "InteractionManager.h"
+#include "StrategyContext.h"
 
 cocos2d::Texture2D* getable_goods::transparent_texture = nullptr;
 
@@ -345,59 +346,78 @@ cocos2d::Rect getable_goods::getBoundingBoxWorld() {
     return bbox;
 }
 
-
-// 3. 核心响应方法
+//【策略模式】
+// 封装原本散落在 onInteract 里的逻辑
+void getable_goods::processToolHit(int power) {
+    this->click_count += power;
+    CCLOG("[GetableGoods] Hit! Power: %d, New Count: %d", power, click_count);
+    this->show_click_bar();
+    this->update();
+}
+//【原先逻辑】
+//// 3. 核心响应方法
+//bool getable_goods::onInteract(const InteractContext& ctx) {
+//    CCLOG("[GetableGoods] onInteract called for %s %p", sprite_name.c_str(), this);
+//    CCLOG("[GetableGoods] Context - isInControl: %s, toolName: '%s', toolLevel: %d",
+//        ctx.isInControl ? "true" : "false", ctx.toolName.c_str(), ctx.toolLevel);
+//
+//    // 1. 检查是否可获取 (is_getable)
+//    if (!this->isInteractable()) {
+//        CCLOG("[GetableGoods] Interaction rejected - not currently getable");
+//        return false;
+//    }
+//
+//    // 2. 检查是否在控制范围内 (除非不需要工具)
+//    std::string requiredTool = GOODS_MAP.at(sprite_name).at("tool");
+//
+//    // 如果需要工具，必须在控制范围内
+//    if (!requiredTool.empty() && !ctx.isInControl) {
+//        CCLOG("[GetableGoods] Interaction rejected - tool required but not in control range");
+//        return false;
+//    }
+//
+//    // 3. 检查工具匹配
+//    bool canInteract = false;
+//
+//    if (requiredTool.empty()) { // 不需要工具 (例如：badGreenhouse)
+//        canInteract = true;
+//        click_count += 1; // 增加点击计数
+//    }
+//    else {
+//        // 需要工具：检查选中的工具名称是否匹配
+//        if (ctx.toolName == requiredTool) {
+//            canInteract = true;
+//            // 根据工具等级增加点击次数
+//            click_count += ctx.toolLevel;
+//            CCLOG("[GetableGoods] Tool matched: required=%s, selected=%s, click_count=%d",
+//                requiredTool.c_str(), ctx.toolName.c_str(), click_count);
+//        }
+//        else {
+//            CCLOG("[GetableGoods] Wrong tool: required=%s, selected=%s",
+//                requiredTool.c_str(), ctx.toolName.c_str());
+//            // 工具不匹配，返回 false，事件继续传播 (例如：用斧头点石头，让移动逻辑接管)
+//            return false;
+//        }
+//    }
+//
+//    // 4. 执行交互逻辑
+//    if (canInteract) {
+//        CCLOG("!!!!click_count:%d", click_count);
+//        this->show_click_bar();
+//        this->update();
+//        return true; // 事件已处理
+//    }
+//
+//    return false; // 不应该到达这里，除非逻辑有误
+//}
+//【策略模式】
 bool getable_goods::onInteract(const InteractContext& ctx) {
-    CCLOG("[GetableGoods] onInteract called for %s %p", sprite_name.c_str(), this);
-    CCLOG("[GetableGoods] Context - isInControl: %s, toolName: '%s', toolLevel: %d",
-        ctx.isInControl ? "true" : "false", ctx.toolName.c_str(), ctx.toolLevel);
+    if (!this->isInteractable()) return false;
 
-    // 1. 检查是否可获取 (is_getable)
-    if (!this->isInteractable()) {
-        CCLOG("[GetableGoods] Interaction rejected - not currently getable");
-        return false;
-    }
+    // 检查范围 (保留原逻辑)
+    std::string reqTool = getRequiredTool();
+    if (!reqTool.empty() && !ctx.isInControl) return false;
 
-    // 2. 检查是否在控制范围内 (除非不需要工具)
-    std::string requiredTool = GOODS_MAP.at(sprite_name).at("tool");
-
-    // 如果需要工具，必须在控制范围内
-    if (!requiredTool.empty() && !ctx.isInControl) {
-        CCLOG("[GetableGoods] Interaction rejected - tool required but not in control range");
-        return false;
-    }
-
-    // 3. 检查工具匹配
-    bool canInteract = false;
-
-    if (requiredTool.empty()) { // 不需要工具 (例如：badGreenhouse)
-        canInteract = true;
-        click_count += 1; // 增加点击计数
-    }
-    else {
-        // 需要工具：检查选中的工具名称是否匹配
-        if (ctx.toolName == requiredTool) {
-            canInteract = true;
-            // 根据工具等级增加点击次数
-            click_count += ctx.toolLevel;
-            CCLOG("[GetableGoods] Tool matched: required=%s, selected=%s, click_count=%d",
-                requiredTool.c_str(), ctx.toolName.c_str(), click_count);
-        }
-        else {
-            CCLOG("[GetableGoods] Wrong tool: required=%s, selected=%s",
-                requiredTool.c_str(), ctx.toolName.c_str());
-            // 工具不匹配，返回 false，事件继续传播 (例如：用斧头点石头，让移动逻辑接管)
-            return false;
-        }
-    }
-
-    // 4. 执行交互逻辑
-    if (canInteract) {
-        CCLOG("!!!!click_count:%d", click_count);
-        this->show_click_bar();
-        this->update();
-        return true; // 事件已处理
-    }
-
-    return false; // 不应该到达这里，除非逻辑有误
+    // 委托给策略
+    return InteractionStrategyContext::getInstance()->handleInteraction(ctx, this);
 }

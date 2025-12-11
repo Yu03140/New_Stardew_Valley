@@ -1,5 +1,6 @@
 #include "crop.h"
 #include "InteractionManager.h"
+#include "StrategyContext.h"
 
 //定义常量
 #define MAG_TIME_CROP 1.5f
@@ -271,85 +272,102 @@ cocos2d::Rect crop::getBoundingBoxWorld() {
     return bbox;
 }
 
+//【原有逻辑】
 // 核心业务逻辑 (完全去除了坐标判断和背包查找)
+//bool crop::onInteract(const InteractContext& ctx) {
+//    CCLOG("[Crop] onInteract called for crop %p", this);
+//    CCLOG("[Crop] Context - isInControl: %s, toolName: '%s', toolLevel: %d, develop_level: %d", 
+//          ctx.isInControl ? "true" : "false", ctx.toolName.c_str(), ctx.toolLevel, develop_level);
+//    
+//    // 1. 必须在控制范围内
+//    if (!ctx.isInControl) {
+//        CCLOG("[Crop] Interaction rejected - not in control range");
+//        return false;
+//    }
+//
+//    // 辅助 lambda：重新拼凑工具全名 (例如 "Can" + 1 -> "Can1")
+//    // 你的旧函数依赖这个全名来解析等级和扣除背包物品
+//    auto getFullToolName = [&]() -> std::string {
+//        return ctx.toolName + std::to_string(ctx.toolLevel);
+//        };
+//
+//    switch (develop_level) {
+//    case -1: // 枯萎
+//        CCLOG("[Crop] Handling withered crop - clearing");
+//        //CCLOG("clear the dead crop");
+//        this->clear(); // 直接调用现有函数
+//        break;
+//
+//    case 5: // 收获
+//        CCLOG("[Crop] Handling mature crop - harvesting");
+//        //CCLOG("harvest the crop");
+//        this->harvest(); // 直接调用现有函数
+//        break;
+//
+//    case 0: // 空地：种植
+//        CCLOG("[Crop] Handling empty soil - checking for planting");
+//        // 种子比较特殊，它不在 ctx.toolName (因为那只存工具)，
+//        // 所以我们这里还是需要访问背包获取当前拿的物品全名
+//        if (backpackLayer && !backpackLayer->getSelectedItem().empty()) {
+//            std::string currentItem = backpackLayer->getSelectedItem();
+//            CCLOG("[Crop] Current selected item: '%s'", currentItem.c_str());
+//            // 检查是否是种子
+//            if (CROP_MAP.count(currentItem)) {
+//                CCLOG("[Crop] Item is a valid seed - planting");
+//                //CCLOG("plant a crop");
+//                this->planting(currentItem); // 直接调用现有函数
+//            } else {
+//                CCLOG("[Crop] Item is not a valid seed");
+//            }
+//        } else {
+//            CCLOG("[Crop] No item selected or backpack is null");
+//        }
+//        break;
+//
+//    case 1: case 2: case 3: case 4: // 成长阶段
+//        CCLOG("[Crop] Handling growing crop - checking tool type");
+//        if (ctx.toolName == "Can") {
+//            // 这里的判断移到了 water 函数内部，但我们在外部做一个简单的工具类型检查
+//            CCLOG("[Crop] Tool is watering can - attempting to water");
+//            //CCLOG("water this crop");
+//            // 传入拼凑好的名字 "Can1"
+//            this->water(getFullToolName());
+//        }
+//        else if (ctx.toolName == "fertilizer") {
+//            CCLOG("[Crop] Tool is fertilizer - attempting to fertilize");
+//            //CCLOG("fertilize this crop");
+//            // 传入拼凑好的名字 "fertilizer1"
+//            this->fertilize(getFullToolName());
+//        }
+//        else {
+//            // 如果是其他工具（比如锄头点到了作物），这里可以加个日志或者什么都不做
+//            CCLOG("[Crop] Tool '%s' cannot be used on growing crops", ctx.toolName.c_str());
+//            //CCLOG("%s couldn't do anything to the crop", ctx.toolName.c_str());
+//        }
+//        break;
+//
+//    default:
+//        CCLOG("[Crop] ERROR: Invalid develop_level %d", develop_level);
+//        //CCLOG("ERROR develop_level!!!!");
+//        break;
+//    }
+//
+//    CCLOG("[Crop] onInteract completed successfully for crop %p", this);
+//    return true;
+//}
+//【策略模式】
 bool crop::onInteract(const InteractContext& ctx) {
-    CCLOG("[Crop] onInteract called for crop %p", this);
-    CCLOG("[Crop] Context - isInControl: %s, toolName: '%s', toolLevel: %d, develop_level: %d", 
-          ctx.isInControl ? "true" : "false", ctx.toolName.c_str(), ctx.toolLevel, develop_level);
-    
-    // 1. 必须在控制范围内
-    if (!ctx.isInControl) {
-        CCLOG("[Crop] Interaction rejected - not in control range");
-        return false;
+    if (!ctx.isInControl) return false;
+
+    // 特殊处理种植 (因为种植不需要点击已有的 crop，而是点击空地，且判定逻辑依赖具体的种子表)
+    // 如果是空地 (level 0) 且手持种子，这里保留原有逻辑或写一个 PlantingStrategy
+    if (develop_level == 0) {
+        if (backpackLayer && CROP_MAP.count(backpackLayer->getSelectedItem())) {
+            this->planting(backpackLayer->getSelectedItem());
+            return true;
+        }
     }
 
-    // 辅助 lambda：重新拼凑工具全名 (例如 "Can" + 1 -> "Can1")
-    // 你的旧函数依赖这个全名来解析等级和扣除背包物品
-    auto getFullToolName = [&]() -> std::string {
-        return ctx.toolName + std::to_string(ctx.toolLevel);
-        };
-
-    switch (develop_level) {
-    case -1: // 枯萎
-        CCLOG("[Crop] Handling withered crop - clearing");
-        //CCLOG("clear the dead crop");
-        this->clear(); // 直接调用现有函数
-        break;
-
-    case 5: // 收获
-        CCLOG("[Crop] Handling mature crop - harvesting");
-        //CCLOG("harvest the crop");
-        this->harvest(); // 直接调用现有函数
-        break;
-
-    case 0: // 空地：种植
-        CCLOG("[Crop] Handling empty soil - checking for planting");
-        // 种子比较特殊，它不在 ctx.toolName (因为那只存工具)，
-        // 所以我们这里还是需要访问背包获取当前拿的物品全名
-        if (backpackLayer && !backpackLayer->getSelectedItem().empty()) {
-            std::string currentItem = backpackLayer->getSelectedItem();
-            CCLOG("[Crop] Current selected item: '%s'", currentItem.c_str());
-            // 检查是否是种子
-            if (CROP_MAP.count(currentItem)) {
-                CCLOG("[Crop] Item is a valid seed - planting");
-                //CCLOG("plant a crop");
-                this->planting(currentItem); // 直接调用现有函数
-            } else {
-                CCLOG("[Crop] Item is not a valid seed");
-            }
-        } else {
-            CCLOG("[Crop] No item selected or backpack is null");
-        }
-        break;
-
-    case 1: case 2: case 3: case 4: // 成长阶段
-        CCLOG("[Crop] Handling growing crop - checking tool type");
-        if (ctx.toolName == "Can") {
-            // 这里的判断移到了 water 函数内部，但我们在外部做一个简单的工具类型检查
-            CCLOG("[Crop] Tool is watering can - attempting to water");
-            //CCLOG("water this crop");
-            // 传入拼凑好的名字 "Can1"
-            this->water(getFullToolName());
-        }
-        else if (ctx.toolName == "fertilizer") {
-            CCLOG("[Crop] Tool is fertilizer - attempting to fertilize");
-            //CCLOG("fertilize this crop");
-            // 传入拼凑好的名字 "fertilizer1"
-            this->fertilize(getFullToolName());
-        }
-        else {
-            // 如果是其他工具（比如锄头点到了作物），这里可以加个日志或者什么都不做
-            CCLOG("[Crop] Tool '%s' cannot be used on growing crops", ctx.toolName.c_str());
-            //CCLOG("%s couldn't do anything to the crop", ctx.toolName.c_str());
-        }
-        break;
-
-    default:
-        CCLOG("[Crop] ERROR: Invalid develop_level %d", develop_level);
-        //CCLOG("ERROR develop_level!!!!");
-        break;
-    }
-
-    CCLOG("[Crop] onInteract completed successfully for crop %p", this);
-    return true;
+    // 其他所有逻辑委托给策略管理器
+    return InteractionStrategyContext::getInstance()->handleInteraction(ctx, this);
 }

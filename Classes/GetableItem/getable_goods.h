@@ -60,6 +60,15 @@ public:
 	virtual void onEnter() override;
 	virtual void onExit() override;
 	//============================
+	// 【策略模式】（所需内容获取）
+	std::string getRequiredTool() const {
+		if (GOODS_MAP.find(sprite_name) != GOODS_MAP.end()) {
+			return GOODS_MAP.at(sprite_name).at("tool");
+		}
+		return "";
+	}
+	//【策略模式】（封装一下逻辑）
+	void processToolHit(int power);
 	void show_click_bar();
 	void hide_click_bar();
 	virtual void update();

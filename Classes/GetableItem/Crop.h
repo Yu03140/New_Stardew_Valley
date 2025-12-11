@@ -61,5 +61,7 @@ public:
     virtual bool isInteractable() override { return true; } // 作物总是可见的
     virtual void onEnter() override;
     virtual void onExit() override;
+    //【策略模式】（所需返回内容）
+    int getDevelopLevel() const { return develop_level; }
 };
 #endif __CROP_H__
