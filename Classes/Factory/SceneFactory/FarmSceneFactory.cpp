@@ -10,6 +10,8 @@
 #include "TimeSystem/TimeSystem.h"
 #include "GetableItem/getable_goods.h"
 #include "Player/PlayerAccount.h"
+//外观模式
+#include "Engine/GameEngine.h"
 // 不再需要包含Scene文件夹下的头文件，使用工厂创建场景
 #include "SceneFactory.h"
 //【观察者模式】
@@ -703,20 +705,19 @@ void FarmSceneProduct::checkForButtonClick(Vec2 mousePosition) {
             auto factoryManager = SceneFactoryManager::getInstance();
             switch (i) {
             case 0:
-                nextScene = factoryManager->createScene(SceneType::MINES_SCENE);
+                //nextScene = factoryManager->createScene(SceneType::MINES_SCENE);
+                GameEngine::getInstance()->changeScene(SceneType::MINES_SCENE);
                 break;
             case 1:
-                nextScene = factoryManager->createScene(SceneType::HOME_SCENE);
+                //nextScene = factoryManager->createScene(SceneType::HOME_SCENE);
+                GameEngine::getInstance()->changeScene(SceneType::HOME_SCENE);
                 break;
             case 2:
-                nextScene = factoryManager->createScene(SceneType::SHED_SCENE);
+                //nextScene = factoryManager->createScene(SceneType::SHED_SCENE);
+                GameEngine::getInstance()->changeScene(SceneType::SHED_SCENE);
                 break;
             }
             
-            if (nextScene) {
-                nextScene->retain();
-                Director::getInstance()->pushScene(nextScene);
-            }
             return;
         }
     }

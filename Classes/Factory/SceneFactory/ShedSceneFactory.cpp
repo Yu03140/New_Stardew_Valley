@@ -2,6 +2,9 @@
 #include "ShedSceneFactory.h"
 #include "GetableItem/animals.h"
 #include "SceneFactory.h"
+#include "Engine/GameEngine.h"
+#include "GetableItem/InteractionManager.h"
+
 
 USING_NS_CC;
 
@@ -276,7 +279,20 @@ void ShedSceneProduct::onEnter() {
 // 功能：退出场景时调用
 //----------------------------------------------------
 void ShedSceneProduct::onExit() {
-    CCLOG("Exiting ShedScene");
+
+    // 清理调度器
+    this->unschedule("update_key_person");
+
+    // 停止交互管理器
+    InteractionManager::getInstance()->stopListening(this->getEventDispatcher());
+    CCLOG("[HomeScene] InteractionManager stopped listening.");
+
+    // 移除背包层
+    if (backpackLayer && backpackLayer->getParent() == this) {
+        backpackLayer->removeFromParent();
+        backpackLayer = nullptr; // 此时全局变量 ::backpackLayer 还在，但场景内的指针置空
+    }
+
     SceneBase::onExit();
 }
 
@@ -286,6 +302,20 @@ void ShedSceneProduct::onExit() {
 //----------------------------------------------------
 void ShedSceneProduct::update(float delta) {
     SceneBase::update(delta);
+
+    //修正背包位置
+    auto camera = Director::getInstance()->getRunningScene()->getDefaultCamera();
+    if (camera && backpackLayer) {
+        Vec2 camPos = camera->getPosition();
+        Size visibleSize = Director::getInstance()->getVisibleSize();
+
+        // 计算屏幕左下角
+        float screenLeftBottomX = camPos.x - visibleSize.width / 2;
+        float screenLeftBottomY = camPos.y - visibleSize.height / 2;
+
+        // 锁定背包位置
+        backpackLayer->setPosition(Vec2(screenLeftBottomX, screenLeftBottomY));
+    }
 }
 
 //----------------------------------------------------
@@ -310,7 +340,8 @@ void ShedSceneProduct::onMouseClick(Event* event) {
         auto factoryManager = SceneFactoryManager::getInstance();
         auto farmScene = factoryManager->createScene(SceneType::FARMGROUND_SCENE);
         if (farmScene) {
-            Director::getInstance()->popScene(); // 使用popScene返回，与矿洞场景一致
+            //Director::getInstance()->popScene(); // 使用popScene返回，与矿洞场景一致
+            GameEngine::getInstance()->changeScene(SceneType::FARMGROUND_SCENE);
         }
     }
 }
