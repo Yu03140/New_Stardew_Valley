@@ -1,7 +1,8 @@
 // HomeSceneFactory.cpp
 #include "HomeSceneFactory.h"
 #include "Charactor/RecipeLayer.h"
-
+#include "Engine/GameEngine.h"
+#include "GetableItem/InteractionManager.h"
 USING_NS_CC;
 
 #define MapSize 4
@@ -129,19 +130,62 @@ void HomeSceneProduct::setupPlayer() {
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
+    //// 创建可移动角色
+    //sprite_move = moveable_sprite_key_walk::create("Jas_Winter.plist", "Jas_Winter");
+    //if (sprite_move) {
+    //    sprite_move->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+    //    this->addChild(sprite_move, Playerlayer);
+    //    sprite_move->init_keyboardlistener();
+    //    
+    //    this->schedule([sprite_move](float dt) {
+    //        sprite_move->update(dt);
+    //    }, "update_key_person");
+    //}
+    //
+    //// HomeScene不需要工具，直接点击精灵即可收获
     // 创建可移动角色
-    auto sprite_move = moveable_sprite_key_walk::create("Jas_Winter.plist", "Jas_Winter");
+    sprite_move = moveable_sprite_key_walk::create("Jas_Winter.plist", "Jas_Winter");
     if (sprite_move) {
         sprite_move->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
         this->addChild(sprite_move, Playerlayer);
         sprite_move->init_keyboardlistener();
-        
-        this->schedule([sprite_move](float dt) {
-            sprite_move->update(dt);
-        }, "update_key_person");
+
+        this->schedule([this](float dt) {
+            if (sprite_move) {
+                sprite_move->update(dt);
+            }
+            }, "update_key_person");
     }
-    
-    // HomeScene不需要工具，直接点击精灵即可收获
+
+    // 创建工具精灵（需要sprite_move成功创建）
+    // 关键修复：矿洞场景也需要工具精灵来显示和检查工具（镐），就像农场场景一样
+    if (sprite_move) {
+        Size originalSize = sprite_move->getContentSize();
+        float scale = sprite_move->getScale();
+        Size scaledSize = Size(originalSize.width * scale, originalSize.height * scale);
+
+        sprite_tool = moveable_sprite_key_tool::create("Tools.plist");
+        if (sprite_tool) {
+            sprite_tool->setPosition(Vec2(visibleSize.width / 2 + origin.x + scaledSize.width / 2,
+                visibleSize.height / 2 + origin.y));
+            this->addChild(sprite_tool, 1);
+            // 【观察者模式】将场景成员变量赋给全局变量
+            ::sprite_tool = sprite_tool;
+            sprite_tool->init_keyboardlistener();
+            //sprite_tool->init_mouselistener();
+            // 创建局部变量用于 lambda 捕获，避免捕获 this 指针
+            auto spriteToolPtr = sprite_tool;
+            sprite_tool->schedule([spriteToolPtr](float dt) {
+                spriteToolPtr->update(dt);
+                }, "update_key_tool");
+        }
+        else {
+            CCLOG("Warning: Failed to create sprite_tool in MinesScene");
+        }
+    }
+    else {
+        CCLOG("Error: Failed to create sprite_move, cannot create tool");
+    }
 }
 
 //----------------------------------------------------
@@ -183,6 +227,26 @@ void HomeSceneProduct::onEnter() {
 // 功能：退出场景时调用
 //----------------------------------------------------
 void HomeSceneProduct::onExit() {
+    // 清理调度器
+    this->unschedule("reinit_player_keyboard");
+    this->unschedule("reinit_tool_mouse");
+    if (sprite_move) {
+        this->unschedule("update_key_person");
+    }
+   
+    if (sprite_tool) {
+        this->unschedule("update_key_tool");
+    }
+
+    // 停止交互管理器
+    InteractionManager::getInstance()->stopListening(this->getEventDispatcher());
+    CCLOG("[HomeScene] InteractionManager stopped listening.");
+
+    //// 移除背包层
+    //if (backpackLayer && backpackLayer->getParent() == this) {
+    //    backpackLayer->removeFromParent();
+    //    backpackLayer = nullptr; // 此时全局变量 ::backpackLayer 还在，但场景内的指针置空
+    //}
     SceneBase::onExit();
 }
 
@@ -192,6 +256,20 @@ void HomeSceneProduct::onExit() {
 //----------------------------------------------------
 void HomeSceneProduct::update(float delta) {
     SceneBase::update(delta);
+
+    //修正背包位置
+    auto camera = Director::getInstance()->getRunningScene()->getDefaultCamera();
+    if (camera && backpackLayer) {
+        Vec2 camPos = camera->getPosition();
+        Size visibleSize = Director::getInstance()->getVisibleSize();
+
+        // 计算屏幕左下角
+        float screenLeftBottomX = camPos.x - visibleSize.width / 2;
+        float screenLeftBottomY = camPos.y - visibleSize.height / 2;
+
+        // 锁定背包位置
+        backpackLayer->setPosition(Vec2(screenLeftBottomX, screenLeftBottomY));
+    }
 }
 
 //----------------------------------------------------
@@ -235,7 +313,8 @@ void HomeSceneProduct::changeScene(Event* event) {
         
         if (doorRect.containsPoint(clickLocation)) {
             CCLOG("Door clicked! Switching scenes...");
-            Director::getInstance()->popScene();
+            //Director::getInstance()->popScene();
+            GameEngine::getInstance()->changeScene(SceneType::FARMGROUND_SCENE);
             return;
         }
     }

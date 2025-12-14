@@ -1,7 +1,8 @@
 #include "AppDelegate.h"   // 应用程序委托头文件
-#include "Factory/SceneFactory/SceneFactory.h"
-#include "Factory/SceneFactory/SceneFactoryRegistry.h"
-#include "Global/Global.h"
+//#include "Factory/SceneFactory/SceneFactory.h"
+//#include "Factory/SceneFactory/SceneFactoryRegistry.h"
+//#include "Global/Global.h"
+#include "Engine/GameEngine.h"
 
 
 // 是否使用音频引擎
@@ -44,64 +45,68 @@ static int register_all_packages()
 // 应用程序启动完成时调用，初始化游戏场景和游戏循环时调用
 bool AppDelegate::applicationDidFinishLaunching() {
 
-    // 获取导演实例，负责管理场景切换和帧率控制
-    auto director = Director::getInstance();
-
-	// 获取OpenGL视图
-    auto glview = director->getOpenGLView();
-
-	// 如果OpenGL视图为空，创建一个新的视图
-    if(!glview) {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-        glview = GLViewImpl::createWithRect("cocos", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
-#else
-        glview = GLViewImpl::create("cocos");
-#endif
-        director->setOpenGLView(glview);
-    }
-
-
-    // 设置 FPS 显示在右下角
-    director->setDisplayStats(true);
-
-    // 设置帧率，默认值为 1.0/60，即每秒 60 帧
-    director->setAnimationInterval(1.0f / 60);
-
-    // 设置设计分辨率
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
-    
-    // 获取设备的实际分辨率
-    auto frameSize = glview->getFrameSize();
-    // 根据设备分辨率的不同，设置不同的缩放比例
-    if (frameSize.height > mediumResolutionSize.height)
-    {        
-        director->setContentScaleFactor(MIN(largeResolutionSize.height/designResolutionSize.height, largeResolutionSize.width/designResolutionSize.width));
-    }
-    else if (frameSize.height > smallResolutionSize.height)
-    {        
-        director->setContentScaleFactor(MIN(mediumResolutionSize.height/designResolutionSize.height, mediumResolutionSize.width/designResolutionSize.width));
-    }
-    else
-    {        
-        director->setContentScaleFactor(MIN(smallResolutionSize.height/designResolutionSize.height, smallResolutionSize.width/designResolutionSize.width));
-    }
-
-    // 注册所有外部包（暂时没有）
-    register_all_packages();
-
-    // 注册所有场景工厂
-    SceneFactoryRegistry::registerAllFactories();
-
-    // 使用工厂创建菜单场景（用户点击按钮后进入农场）
-    auto factoryManager = SceneFactoryManager::getInstance();
-    cocos2d::Scene* scene = factoryManager->createScene(SceneType::HENU_SCENE);
-    
-    if (!scene) {
-        CCLOG("Critical: Failed to create menu scene, exiting.");
-        return false;
-    }
-    
-    director->runWithScene(scene);
+//    // 获取导演实例，负责管理场景切换和帧率控制
+//    auto director = Director::getInstance();
+//
+//	// 获取OpenGL视图
+//    auto glview = director->getOpenGLView();
+//
+//	// 如果OpenGL视图为空，创建一个新的视图
+//    if(!glview) {
+//#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
+//        glview = GLViewImpl::createWithRect("cocos", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
+//#else
+//        glview = GLViewImpl::create("cocos");
+//#endif
+//        director->setOpenGLView(glview);
+//    }
+//
+//
+//    // 设置 FPS 显示在右下角
+//    director->setDisplayStats(true);
+//
+//    // 设置帧率，默认值为 1.0/60，即每秒 60 帧
+//    director->setAnimationInterval(1.0f / 60);
+//
+//    // 设置设计分辨率
+//    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
+//    
+//    // 获取设备的实际分辨率
+//    auto frameSize = glview->getFrameSize();
+//    // 根据设备分辨率的不同，设置不同的缩放比例
+//    if (frameSize.height > mediumResolutionSize.height)
+//    {        
+//        director->setContentScaleFactor(MIN(largeResolutionSize.height/designResolutionSize.height, largeResolutionSize.width/designResolutionSize.width));
+//    }
+//    else if (frameSize.height > smallResolutionSize.height)
+//    {        
+//        director->setContentScaleFactor(MIN(mediumResolutionSize.height/designResolutionSize.height, mediumResolutionSize.width/designResolutionSize.width));
+//    }
+//    else
+//    {        
+//        director->setContentScaleFactor(MIN(smallResolutionSize.height/designResolutionSize.height, smallResolutionSize.width/designResolutionSize.width));
+//    }
+//
+//    // 注册所有外部包（暂时没有）
+//    register_all_packages();
+//
+//    // 注册所有场景工厂
+//    SceneFactoryRegistry::registerAllFactories();
+//
+//    // 使用工厂创建菜单场景（用户点击按钮后进入农场）
+//    auto factoryManager = SceneFactoryManager::getInstance();
+//    cocos2d::Scene* scene = factoryManager->createScene(SceneType::HENU_SCENE);
+//    
+//    if (!scene) {
+//        CCLOG("Critical: Failed to create menu scene, exiting.");
+//        return false;
+//    }
+//    
+//    director->runWithScene(scene);
+// 
+	//将场景逻辑交给GameEngine管理
+    GameEngine::getInstance()->initSystem();
+    GameEngine::getInstance()->startGame();
 
     return true;
 }

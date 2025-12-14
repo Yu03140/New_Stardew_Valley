@@ -3,6 +3,8 @@
 
 #include "cocos2d.h"
 #include "Global/Global.h"
+#include "IInteractable.h"
+#include "Data/GameModels.h"
 
 #define MAX_LEVEL 5
 #define DIE_DRY 4
@@ -12,47 +14,60 @@ struct GOODS_INHAND {
     std::string goods_name;
 };
 
-//×÷ÎïÖÖÖ²Ïà¹ØĞÅÏ¢
-const std::unordered_map<std::string, std::unordered_map<std::string, int>> CROP_MAP =
-{
-    {"strawberry",{{"develop_day",5},{"season",SPRING}}},
-    {"sunflour",{{"develop_day",4},{"season",SUMMER}}},
-    {"pumpkin",{{"develop_day",5},{"season",AUTUMN}}}
-};
-//×÷Îï³ÉÊìºóµÃµ½µÄÉú³ÉÆ·
-const std::unordered_map<std::string, std::string> HARVEST_MAP =
-{
-    {"strawberry","strawberry_fruit"},
-    {"sunflour","sunflour_fruit"},
-    {"pumpkin","sunflour_fruit"}
-};
+////ç§»åŠ¨åˆ°GameData
+////ä½œç‰©ç§æ¤ç›¸å…³ä¿¡æ¯
+//const std::unordered_map<std::string, std::unordered_map<std::string, int>> CROP_MAP =
+//{
+//    {"strawberry",{{"develop_day",5},{"season",SPRING}}},
+//    {"sunflour",{{"develop_day",4},{"season",SUMMER}}},
+//    {"pumpkin",{{"develop_day",5},{"season",AUTUMN}}}
+//};
+////ä½œç‰©æˆç†Ÿåå¾—åˆ°çš„ç”Ÿæˆå“
+//const std::unordered_map<std::string, std::string> HARVEST_MAP =
+//{
+//    {"strawberry","strawberry_fruit"},
+//    {"sunflour","sunflour_fruit"},
+//    {"pumpkin","sunflour_fruit"}
+//};
 
-class crop : public cocos2d::Sprite
+class crop : public cocos2d::Sprite, public IInteractable
 {
 private:
-    int now_day = 0;                             //µ±Ç°ÈÕÆÚ
-    std::string crop_name;                       //×÷ÎïµÄÃû³Æ
-    int develop_day;                              //Ã¿³É³¤Ò»½×¶ÎËùĞèÒªµÄÌìÊı
+    int now_day = 0;                             //å½“å‰æ—¥æœŸ
 
-    int water_count = 0;                         //½½Ë®×ÜÌìÊı
-    int unwater_count = 0;                       //Ã»ÓĞ½½Ë®µÄÁ¬ĞøÌìÊı
-    int develop_level = 0;                       //Ä¿Ç°Éú³¤½×¶Î
-    int watered_today = WATER_PRED;              //½ñÌìÊ£Óà½½Ë®´ÎÊı
+    //std::string crop_name;                       //ä½œç‰©çš„åç§°
+    //int develop_day;                              //æ¯æˆé•¿ä¸€é˜¶æ®µæ‰€éœ€è¦çš„å¤©æ•°
+    CropModel* _model = nullptr;
+    int water_count = 0;                         //æµ‡æ°´æ€»å¤©æ•°
+    int unwater_count = 0;                       //æ²¡æœ‰æµ‡æ°´çš„è¿ç»­å¤©æ•°
+    int develop_level = 0;                       //ç›®å‰ç”Ÿé•¿é˜¶æ®µ
+    int watered_today = WATER_PRED;              //ä»Šå¤©å‰©ä½™æµ‡æ°´æ¬¡æ•°
 
     static cocos2d::Texture2D* transparent_texture;
     static cocos2d::Size crop_size;
 public:
     
-    static crop* create(const std::string& plist_name, float width, float height);  // ´´½¨ÊµÀı 
-    void init_mouselistener();                                                      // ³õÊ¼»¯Êó±ê¼àÌıÆ÷
-    void on_mouse_click(cocos2d::Event* event);                                     // Êó±ê°´ÏÂÊ±µÄ»Øµ÷ 
-    void planting(std::string name);                                                // ÖÖÖ²¹¦ÄÜ
-    void water(std::string name);                                                   // ½½Ë®¹¦ÄÜµÄÊµÏÖ
-	void fertilize(std::string name); 											    // Ê©·Ê¹¦ÄÜµÄÊµÏÖ
-    void clear();                                                                   // Çå³ı
-    void harvest();                                                                 // ÊÕ»ñ¹¦ÄÜ
-    void update_day(float deltaTime);                                               // ĞÂÒ»ÌìµÄ¸üĞÂ
-    void deinsectization();                                                         // ³ı³æ
+    static crop* create(const std::string& plist_name, float width, float height);  // åˆ›å»ºå®ä¾‹ 
 
+	std::string getCropID() const { return _model ? _model->id : ""; }              // è·å–ä½œç‰©ID
+
+    //ã€åŸæœ‰é€»è¾‘ã€‘
+    //void init_mouselistener();                                                      // åˆå§‹åŒ–é¼ æ ‡ç›‘å¬å™¨
+    //void on_mouse_click(cocos2d::Event* event);                                     // é¼ æ ‡æŒ‰ä¸‹æ—¶çš„å›è°ƒ 
+    void planting(std::string name);                                                // ç§æ¤åŠŸèƒ½
+    void water(std::string name);                                                   // æµ‡æ°´åŠŸèƒ½çš„å®ç°
+	void fertilize(std::string name); 											    // æ–½è‚¥åŠŸèƒ½çš„å®ç°
+    void clear();                                                                   // æ¸…é™¤
+    void harvest();                                                                 // æ”¶è·åŠŸèƒ½
+    void update_day(float deltaTime);                                               // æ–°ä¸€å¤©çš„æ›´æ–°
+    void deinsectization();                                                         // é™¤è™«
+    //ã€è§‚å¯Ÿè€…æ¨¡å¼ã€‘
+    virtual cocos2d::Rect getBoundingBoxWorld() override;
+    virtual bool onInteract(const InteractContext& ctx) override;
+    virtual bool isInteractable() override { return true; } // ä½œç‰©æ€»æ˜¯å¯è§çš„
+    virtual void onEnter() override;
+    virtual void onExit() override;
+    //ã€ç­–ç•¥æ¨¡å¼ã€‘ï¼ˆæ‰€éœ€è¿”å›å†…å®¹ï¼‰
+    int getDevelopLevel() const { return develop_level; }
 };
 #endif __CROP_H__

@@ -1,6 +1,6 @@
 //----------------------------------------------------
-// ¾«Áé£º¿ÉÍ¨¹ı¹¤¾ßÔÚµØÍ¼ÖĞ»ñÈ¡µÄÎïÆ·
-// ËµÃ÷£ºĞèÒª¸ÃÎïÆ·Ãû³Æ¡¢»ñÈ¡ËùĞèµã»÷´ÎÊı¡¢»ñÈ¡ËùĞè¹¤¾ß
+// ç²¾çµï¼šå¯é€šè¿‡å·¥å…·åœ¨åœ°å›¾ä¸­è·å–çš„ç‰©å“
+// è¯´æ˜ï¼šéœ€è¦è¯¥ç‰©å“åç§°ã€è·å–æ‰€éœ€ç‚¹å‡»æ¬¡æ•°ã€è·å–æ‰€éœ€å·¥å…·
 //----------------------------------------------------
 #ifndef __GETABLE_GOOD_H__
 #define  __GETABLE_GOOD_H__
@@ -8,46 +8,76 @@
 #include "cocos2d.h"
 #include "Global/Global.h"
 #include "progress_bar.h"
+#include "IInteractable.h"
+#include "Data/GameModels.h"
 
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 80
 #define EXPERIENCE 5
 #define PERCENT 0.5
-const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> GOODS_MAP =
-{
-	{"grass",{{"get","straw"},{"tool","Hoe"}}},
-	{"stones",{{"get","stone"},{"tool","Pick"}}},
-	{"bigstone",{{"get","stone"},{"tool","Pick"}}},
-	{"mine",{{"get","copper"},{"tool","Pick"}}},
-	{"tree",{{"get","wood"},{"tool","Axe"}}},
-	{"badGreenhouse",{{"get",""},{"tool",""}}}
-};
-const std::unordered_map<std::string, int> GOODS_CLICK_MAP =
-{
-	{"grass",3 * 2},{"stones",5 * 2},{"bigstone",10 * 2},{"mine",15 * 2},{"tree",10 * 2},{"badGreenhouse", 30 * 2}
-};
 
-class getable_goods : public cocos2d::Sprite
+//ç§»åˆ°GameData ä¸­
+//const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> GOODS_MAP =
+//{
+//	{"grass",{{"get","straw"},{"tool","Hoe"}}},
+//	{"stones",{{"get","stone"},{"tool","Pick"}}},
+//	{"bigstone",{{"get","stone"},{"tool","Pick"}}},
+//	{"mine",{{"get","copper"},{"tool","Pick"}}},
+//	{"tree",{{"get","wood"},{"tool","Axe"}}},
+//	{"badGreenhouse",{{"get",""},{"tool",""}}}
+//};
+//const std::unordered_map<std::string, int> GOODS_CLICK_MAP =
+//{
+//	{"grass",3 * 2},{"stones",5 * 2},{"bigstone",10 * 2},{"mine",15 * 2},{"tree",10 * 2},{"badGreenhouse", 30 * 2}
+//};
+
+class getable_goods : public cocos2d::Sprite, public IInteractable
 {
 private:
 	Size sprite_size;
 	static cocos2d::Texture2D* transparent_texture;
 	progress_bar* click_bar = nullptr;
 protected:
-	std::string sprite_name;
+	//äº«å…ƒæŒ‡é’ˆæ›¿ä»£
+	//std::string sprite_name;
+	ItemModel* _model = nullptr;
+
 	int click_count = 0;
-	bool is_getable = 0;//1->ÓĞ¿É»ñÈ¡£»0->ÒÑ¾­±»»ñÈ¡£¬´Ë´¦Îª¿Õ
+	bool is_getable = 0;//1->æœ‰å¯è·å–ï¼›0->å·²ç»è¢«è·å–ï¼Œæ­¤å¤„ä¸ºç©º
 public:
-	// ´´½¨ÊµÀı
+	// åˆ›å»ºå®ä¾‹
 	void set_info(std::string name, Size size);
 	static getable_goods* create(const std::string& plist_name);
 	virtual void setImag();
 
 	bool get_is_getable() { return is_getable; }
-	// ³õÊ¼»¯Êó±ê¼àÌıÆ÷
-	void init_mouselistener();
-	// Êó±ê°´ÏÂÊ±µÄ»Øµ÷
-	void on_mouse_click(cocos2d::Event* event);
+	//// åˆå§‹åŒ–é¼ æ ‡ç›‘å¬å™¨
+	//void init_mouselistener();
+	//// é¼ æ ‡æŒ‰ä¸‹æ—¶çš„å›è°ƒ
+	//void on_mouse_click(cocos2d::Event* event);
+	// ã€è§‚å¯Ÿè€…æ¨¡å¼ã€‘
+	// ã€å®ç° IInteractable æ¥å£ã€‘
+	virtual cocos2d::Rect getBoundingBoxWorld() override;
+	virtual int getInteractPriority() override { return 10; } // èµ‹äºˆæ›´é«˜çš„ä¼˜å…ˆçº§ï¼Œä»¥å¤„ç†é‡å ï¼Œæ¯”å¦‚çŸ³å¤´ç›–åœ¨è‰ä¸Š
+	virtual bool onInteract(const InteractContext& ctx) override;
+	virtual bool isInteractable() override { return is_getable; } // åªæœ‰å¯è·å–æ—¶æ‰å¯äº¤äº’
+
+	// ã€Cocos2d-x ç”Ÿå‘½å‘¨æœŸã€‘ (ç”¨äºè‡ªåŠ¨æ³¨å†Œ)
+	virtual void onEnter() override;
+	virtual void onExit() override;
+	//============================
+	// ã€ç­–ç•¥æ¨¡å¼ã€‘ï¼ˆæ‰€éœ€å†…å®¹è·å–ï¼‰
+	std::string getRequiredTool() const {
+		//if (GOODS_MAP.find(sprite_name) != GOODS_MAP.end()) {
+		//	return GOODS_MAP.at(sprite_name).at("tool");
+		//}
+		if (_model) {
+			return _model->requiredTool;
+		}
+		return "";
+	}
+	//ã€ç­–ç•¥æ¨¡å¼ã€‘ï¼ˆå°è£…ä¸€ä¸‹é€»è¾‘ï¼‰
+	void processToolHit(int power);
 	void show_click_bar();
 	void hide_click_bar();
 	virtual void update();
@@ -59,18 +89,18 @@ public:
 class GoodsManager :public Node
 {
 private:
-	// Ê¹ÓÃ std::vector À´´æ´¢¾«Áé
+	// ä½¿ç”¨ std::vector æ¥å­˜å‚¨ç²¾çµ
 	std::vector<getable_goods*> goods;
 	int getable_count = 0;
 public:
 	static GoodsManager* create();
-	// Ìí¼Ó¾«Áéµ½ÈİÆ÷
+	// æ·»åŠ ç²¾çµåˆ°å®¹å™¨
 	void add_goods(getable_goods* sprite);
 
-	// µü´úÆ÷±éÀú·ÃÎÊ¾«Áé
+	// è¿­ä»£å™¨éå†è®¿é—®ç²¾çµ
 	void get_getable_count();
 
-	// Ëæ»ú·ÃÎÊÒ»¸ö¾«Áé£¨Í¨¹ıµü´úÆ÷£©
+	// éšæœºè®¿é—®ä¸€ä¸ªç²¾çµï¼ˆé€šè¿‡è¿­ä»£å™¨ï¼‰
 	void random_access();
 	void start_scheduler();
 	void stop_scheduler();

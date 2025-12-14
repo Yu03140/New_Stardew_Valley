@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "Global/Global.h"
+#include "Data/GameModels.h"
 
 #define FOOD "straw"
 #define SPEED 10.0f
@@ -10,45 +11,51 @@
 #define EDGE1 120
 #define EDGE0 10
 
-const std::unordered_map<std::string, int> ANIMAL_MAP = { {"Pig",5},{"Goat",5},{"Chicken",1} ,{"Cow",7} };                                                  //¶¯ÎïµÄ³É³¤Í¼¼ø
-const std::unordered_map<std::string, std::string> PRODUCE_MAP = { {"Pig","truffle"},{"Goat","goat_wool"},{"Chicken","chicken_egg"} ,{"Cow","cow_milk"} };  //¶¯ÎïÉú³ÉÎï
+//ç§»å…¥ GameData
+//const std::unordered_map<std::string, int> ANIMAL_MAP = { {"Pig",5},{"Goat",5},{"Chicken",1} ,{"Cow",7} };                                                  //åŠ¨ç‰©çš„æˆé•¿å›¾é‰´
+//const std::unordered_map<std::string, std::string> PRODUCE_MAP = { {"Pig","truffle"},{"Goat","goat_wool"},{"Chicken","chicken_egg"} ,{"Cow","cow_milk"} };  //åŠ¨ç‰©ç”Ÿæˆç‰©
 
 class animals : public cocos2d::Sprite
 {
 private:
 
-    Sprite* produce;
-    int now_day = 0;                                                        //µ±Ç°ÈÕÆÚ
-    std::string animals_name;                                               //¶¯ÎïµÄÃû³Æ
-    int produce_day;                                                        //Ã¿´ÎÉú³É¸½ÊôÆ·ËùĞèÒªµÄÌìÊı
-    bool is_produce = 0;                                                    //ÊÇ·ñÉú³É¸½ÊôÆ·
-    int feed_count = 0;                                                     //Î¹Ñø×ÜÌìÊı
-    int feed_today = 1;                                                     //½ñÌìÊ£ÓàÎ¹Ñø´ÎÊı
+    Sprite* produce = nullptr;
+    int now_day = 0;                                                        //å½“å‰æ—¥æœŸ
+
+    //std::string animals_name;                                               //åŠ¨ç‰©çš„åç§°
+    //int produce_day;                                                        //æ¯æ¬¡ç”Ÿæˆé™„å±å“æ‰€éœ€è¦çš„å¤©æ•°
+    AnimalModel* _model = nullptr;
+
+    bool is_produce = 0;                                                    //æ˜¯å¦ç”Ÿæˆé™„å±å“
+    int feed_count = 0;                                                     //å–‚å…»æ€»å¤©æ•°
+    int feed_today = 1;                                                     //ä»Šå¤©å‰©ä½™å–‚å…»æ¬¡æ•°
+
 	static cocos2d::Texture2D* transparent_texture;
     cocos2d::Size produce_size;
     cocos2d::Vec2 produce_pos;
     static int count;
     int ID;
-	float move_vecx[4] = { 0,0,-SPEED * 0.1f,SPEED * 0.1f };                //ÒÆ¶¯ÏòÁ¿
-	float move_vecy[4] = { SPEED * 0.1f,-SPEED * 0.1f ,0,0 };               //ÒÆ¶¯ÏòÁ¿
+	float move_vecx[4] = { 0,0,-SPEED * 0.1f,SPEED * 0.1f };                //ç§»åŠ¨å‘é‡
+	float move_vecy[4] = { SPEED * 0.1f,-SPEED * 0.1f ,0,0 };               //ç§»åŠ¨å‘é‡
     bool movement[4] = { false, false, false, false };
-	bool is_hit_edge[4] = { false,false, false, false };                    //ÊÇ·ñÅöµ½±ß½ç
+	bool is_hit_edge[4] = { false,false, false, false };                    //æ˜¯å¦ç¢°åˆ°è¾¹ç•Œ
     int dic;
 public:
 
     animals();
-    void set_info(std::string name, cocos2d::Vec2 pos, cocos2d::Size size); //±£´æ»ù±¾ĞÅÏ¢ 
+    void set_info(std::string name, cocos2d::Vec2 pos, cocos2d::Size size); //ä¿å­˜åŸºæœ¬ä¿¡æ¯ 
     static animals* create(const std::string& plist_name);
     void set_imag();
-    void init_mouselistener();                                              // ³õÊ¼»¯Êó±ê¼àÌıÆ÷
-    void on_mouse_click(cocos2d::Event* event);                             // Êó±ê°´ÏÂÊ±µÄ»Øµ÷
-    void randmove(cocos2d::TMXTiledMap* tileMap);                           // ÓÎµ´
+    void init_mouselistener();                                              // åˆå§‹åŒ–é¼ æ ‡ç›‘å¬å™¨
+    void on_mouse_click(cocos2d::Event* event);                             // é¼ æ ‡æŒ‰ä¸‹æ—¶çš„å›è°ƒ
+    void randmove(cocos2d::TMXTiledMap* tileMap);                           // æ¸¸è¡
     void move_act(cocos2d::TMXTiledMap* tileMap);
     void scheduleRandomMove(cocos2d::TMXTiledMap* tileMap);
-    void feed();                                                            // Î¹Ê³
-    void create_produce();                                                  // Éú³É¸½ÊôÆ·
-    void harvest();                                                         // ÊÕ»ñ¹¦ÄÜ
-    void update_day(float deltaTime);                                       // ĞÂÒ»ÌìµÄ¸üĞÂ
+    void feed();                                                            // å–‚é£Ÿ
+    void create_produce();                                                  // ç”Ÿæˆé™„å±å“
+    void harvest();                                                         // æ”¶è·åŠŸèƒ½
+    void update_day(float deltaTime);                                       // æ–°ä¸€å¤©çš„æ›´æ–°
+
 };
 
 class AnimalsManager :public Node
@@ -57,10 +64,8 @@ private:
     std::vector<animals*> animals_list;
 public:
     static AnimalsManager* create();
-    void add_animals(animals* sprite);                                      // Ìí¼Ó¾«Áéµ½ÈİÆ÷
-    void schedule_animals();                                                // µü´úÆ÷±éÀú·ÃÎÊ¾«Áé
+    void add_animals(animals* sprite);                                      // æ·»åŠ ç²¾çµåˆ°å®¹å™¨
+    void schedule_animals();                                                // è¿­ä»£å™¨éå†è®¿é—®ç²¾çµ
 };
-
-
 
 #endif __ANIMALS_H__

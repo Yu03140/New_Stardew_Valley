@@ -103,11 +103,16 @@ public:
     //�����ƶ�ָ��
     void moveable_sprite_key_tool::move_act(int direction) override;
 
-    // ��ʼ����������
-    void init_mouselistener();
+    //// ��ʼ����������
+    //void init_mouselistener();
 
-    // ��갴��ʱ�Ļص�
-    void on_mouse_click(cocos2d::Event* event);
+    //// ��갴��ʱ�Ļص�
+    //void on_mouse_click(cocos2d::Event* event);
+
+    // 【观察者模式：用于被 InteractionManager 调用】
+    void playClickAnimation();
+
+    std::string get_sprite_name_tool() { return sprite_name_tool; }
 
     void update(float deltaTime) override;
 

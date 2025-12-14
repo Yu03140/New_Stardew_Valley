@@ -337,7 +337,6 @@ cocos2d::Vec2 moveable_sprite_key_walk::get_pos()
 }
 
 moveable_sprite_key_tool* moveable_sprite_key_tool::create(const std::string& plist_name)
-
 {
     //����plist�ļ�
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
@@ -420,63 +419,85 @@ void moveable_sprite_key_tool::move_act(int direction)
     this->runAction(move_action);
 }
 
-// ��ʼ����������
-void moveable_sprite_key_tool::init_mouselistener()
+//// ��ʼ����������
+//void moveable_sprite_key_tool::init_mouselistener()
+//{
+//    // 先移除旧的鼠标监听器，避免重复注册
+//    _eventDispatcher->removeEventListenersForTarget(this);
+//
+//    // ������������
+//    auto listener = cocos2d::EventListenerMouse::create();
+//
+//    // ��갴��ʱ�Ļص�
+//    listener->onMouseDown = CC_CALLBACK_1(moveable_sprite_key_tool::on_mouse_click, this);
+//
+//    // ��ȡ�¼��ַ��������Ӽ�����
+//    // 关键修复：使用固定优先级2，确保工具精灵的监听器在场景监听器（优先级1）之后但在精灵监听器之前处理
+//    _eventDispatcher->addEventListenerWithFixedPriority(listener, 2);
+//}
+//
+//// ��갴��ʱ�Ļص�
+//void moveable_sprite_key_tool::on_mouse_click(cocos2d::Event* event)
+//{
+//    
+//    auto tool_pos = this->getPosition();
+//    auto tool_size = this->getContentSize();
+//    Vec2 mouse_pos;
+//    if (is_infarm)
+//    {
+//        mouse_pos = MOUSE_POS;
+//    }
+//    else {
+//        auto mouse_event = dynamic_cast<cocos2d::EventMouse*>(event);
+//        mouse_pos = this->getParent()->convertToNodeSpace(mouse_event->getLocationInView());
+//    }
+//
+//    if (mouse_pos.x > character_pos.x - CONTROL_RANGE &&
+//        mouse_pos.x < character_pos.x + CONTROL_RANGE &&
+//        mouse_pos.y > character_pos.y - CONTROL_RANGE &&
+//        mouse_pos.y < character_pos.y + CONTROL_RANGE)
+//    {
+//        is_in_control = 1;
+//        CCLOG("Tool: IN CONTROL, mouse_pos=(%f, %f), character_pos=(%f, %f)", 
+//              mouse_pos.x, mouse_pos.y, character_pos.x, character_pos.y);
+//        if (TOOLS_MAP.count(sprite_name_tool)) {
+//            CCLOG("tool click!");
+//            // �л�����
+//            this->setSpriteFrame(sprite_name_tool + direc + "-clicked.png");
+//
+//            // �� 0.2 ���ָ�ԭͼ
+//            this->scheduleOnce([this](float dt) {
+//                if (sprite_name_tool != "")
+//                    this->setSpriteFrame(sprite_name_tool + direc + ".png");
+//                }, 0.2f, "reset_texture_key");
+//        }
+//    }
+//    else {
+//        is_in_control = 0;
+//        CCLOG("Tool: NOT IN CONTROL, mouse_pos=(%f, %f), character_pos=(%f, %f)", 
+//              mouse_pos.x, mouse_pos.y, character_pos.x, character_pos.y);
+//    }
+//
+//}
+
+// 【观察者模式：播放点击动画】
+void moveable_sprite_key_tool::playClickAnimation()
 {
-    // 先移除旧的鼠标监听器，避免重复注册
-    _eventDispatcher->removeEventListenersForTarget(this);
+    // 不再进行坐标或 is_in_control 检查，因为 InteractionManager 已经完成了验证。
+    // 我们只需要检查当前是否有工具被选中。
+    if (TOOLS_MAP.count(sprite_name_tool)) {
+        CCLOG("Tool click effect triggered by InteractionManager!");
 
-    // ������������
-    auto listener = cocos2d::EventListenerMouse::create();
+        // 切换图片到点击状态
+        this->setSpriteFrame(sprite_name_tool + direc + "-clicked.png");
 
-    // ��갴��ʱ�Ļص�
-    listener->onMouseDown = CC_CALLBACK_1(moveable_sprite_key_tool::on_mouse_click, this);
-
-    // ��ȡ�¼��ַ��������Ӽ�����
-    // 关键修复：使用固定优先级2，确保工具精灵的监听器在场景监听器（优先级1）之后但在精灵监听器之前处理
-    _eventDispatcher->addEventListenerWithFixedPriority(listener, 2);
-}
-
-// ��갴��ʱ�Ļص�
-void moveable_sprite_key_tool::on_mouse_click(cocos2d::Event* event)
-{
-    
-    auto tool_pos = this->getPosition();
-    auto tool_size = this->getContentSize();
-    Vec2 mouse_pos;
-    if (is_infarm)
-    {
-        mouse_pos = MOUSE_POS;
+        // 在 0.2 秒后恢复原图
+        this->scheduleOnce([this](float dt) {
+            if (sprite_name_tool != "")
+                this->setSpriteFrame(sprite_name_tool + direc + ".png");
+            }, 0.2f, "reset_texture_key");
     }
     else {
-        auto mouse_event = dynamic_cast<cocos2d::EventMouse*>(event);
-        mouse_pos = this->getParent()->convertToNodeSpace(mouse_event->getLocationInView());
+        CCLOG("Tool click received but no active tool selected.");
     }
-
-    if (mouse_pos.x > character_pos.x - CONTROL_RANGE &&
-        mouse_pos.x < character_pos.x + CONTROL_RANGE &&
-        mouse_pos.y > character_pos.y - CONTROL_RANGE &&
-        mouse_pos.y < character_pos.y + CONTROL_RANGE)
-    {
-        is_in_control = 1;
-        CCLOG("Tool: IN CONTROL, mouse_pos=(%f, %f), character_pos=(%f, %f)", 
-              mouse_pos.x, mouse_pos.y, character_pos.x, character_pos.y);
-        if (TOOLS_MAP.count(sprite_name_tool)) {
-            CCLOG("tool click!");
-            // �л�����
-            this->setSpriteFrame(sprite_name_tool + direc + "-clicked.png");
-
-            // �� 0.2 ���ָ�ԭͼ
-            this->scheduleOnce([this](float dt) {
-                if (sprite_name_tool != "")
-                    this->setSpriteFrame(sprite_name_tool + direc + ".png");
-                }, 0.2f, "reset_texture_key");
-        }
-    }
-    else {
-        is_in_control = 0;
-        CCLOG("Tool: NOT IN CONTROL, mouse_pos=(%f, %f), character_pos=(%f, %f)", 
-              mouse_pos.x, mouse_pos.y, character_pos.x, character_pos.y);
-    }
-
 }

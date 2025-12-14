@@ -4,6 +4,7 @@
 
 #include "SceneFactory.h"
 #include "GetableItem/animals.h"
+#include "Moveable/moveable_sprite_key.h"
 
 // ShedScene的具体产品类
 class ShedSceneProduct : public SceneBase {
@@ -35,6 +36,9 @@ private:
     
     // ShedScene特有成员
     AnimalsManager* animals_manager = nullptr;
+
+    moveable_sprite_key_walk* sprite_move = nullptr;
+    moveable_sprite_key_tool* sprite_tool = nullptr;
 };
 
 // ShedScene的具体工厂类

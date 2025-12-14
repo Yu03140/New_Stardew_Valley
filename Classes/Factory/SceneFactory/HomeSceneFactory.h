@@ -29,6 +29,9 @@ protected:
     
 private:
     void changeScene(cocos2d::Event* event);
+
+    moveable_sprite_key_walk* sprite_move = nullptr;
+    moveable_sprite_key_tool* sprite_tool = nullptr;
 };
 
 // HomeScene的具体工厂类
