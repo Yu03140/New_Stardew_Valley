@@ -5,6 +5,9 @@
 #include "Global/Global.h"
 #include "IInteractable.h"
 #include "Data/GameModels.h"
+#include "Share/ProgressTrackerComponent.h"
+#include "Share/DailyUpdateComponent.h"
+#include "Share/HarvestComponent.h"
 
 #define MAX_LEVEL 5
 #define DIE_DRY 4
@@ -33,12 +36,13 @@ struct GOODS_INHAND {
 class crop : public cocos2d::Sprite, public IInteractable
 {
 private:
-    int now_day = 0;                             //当前日期
+    DailyUpdateComponent dailyUpdater;           //每日更新组件
 
     //std::string crop_name;                       //作物的名称
     //int develop_day;                              //每成长一阶段所需要的天数
     CropModel* _model = nullptr;
-    int water_count = 0;                         //浇水总天数
+    ProgressTrackerComponent waterTracker;       //浇水进度追踪组件
+    HarvestComponent harvester;                  //收获组件
     int unwater_count = 0;                       //没有浇水的连续天数
     int develop_level = 0;                       //目前生长阶段
     int watered_today = WATER_PRED;              //今天剩余浇水次数

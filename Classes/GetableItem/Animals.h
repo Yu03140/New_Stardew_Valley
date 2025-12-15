@@ -4,6 +4,9 @@
 #include "cocos2d.h"
 #include "Global/Global.h"
 #include "Data/GameModels.h"
+#include "Share/ProgressTrackerComponent.h"
+#include "Share/DailyUpdateComponent.h"
+#include "Share/HarvestComponent.h"
 
 #define FOOD "straw"
 #define SPEED 10.0f
@@ -20,14 +23,15 @@ class animals : public cocos2d::Sprite
 private:
 
     Sprite* produce = nullptr;
-    int now_day = 0;                                                        //当前日期
+    DailyUpdateComponent dailyUpdater;                                      //每日更新组件
 
     //std::string animals_name;                                               //动物的名称
     //int produce_day;                                                        //每次生成附属品所需要的天数
     AnimalModel* _model = nullptr;
 
     bool is_produce = 0;                                                    //是否生成附属品
-    int feed_count = 0;                                                     //喂养总天数
+    ProgressTrackerComponent feedTracker;                                   //喂食进度追踪组件
+    HarvestComponent harvester;                                             //收获组件
     int feed_today = 1;                                                     //今天剩余喂养次数
 
 	static cocos2d::Texture2D* transparent_texture;

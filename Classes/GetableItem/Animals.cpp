@@ -21,6 +21,49 @@ void animals::set_info(std::string name, cocos2d::Vec2 pos, cocos2d::Size size)
     produce_pos = pos;
     //produce_day = ANIMAL_MAP.at(animals_name);
 
+    // 初始化喂食进度追踪组件
+    feedTracker.setup(
+        [this]() {
+            // 条件：喂食次数是产出周期的倍数
+            return _model && feedTracker.getCount() > 0 && feedTracker.getCount() % _model->produceCycle == 0;
+        },
+        [this]() {
+            // 动作：生成产出物
+            if (produce && _model) {
+                produce->setSpriteFrame(_model->id + "-produce.png");
+                is_produce = 1;
+                CCLOG("[Animals] Produce created: %s", (_model->id + "-produce.png").c_str());
+            }
+        }
+    );
+    feedTracker.reset();
+
+    // 初始化每日更新组件
+    dailyUpdater.setup(
+        [this]() { return timeSystem->getDay(); },  // 获取当前天数
+        [this]() {  // 每日执行的逻辑
+            if (_model) {
+                if (feed_today == 0) {  // 说明今天喂过了
+                    // 使用进度追踪组件累计喂食次数
+                    feedTracker.increment();
+                    CCLOG("[Animals] Feed count: %d", feedTracker.getCount());
+                    this->create_produce();
+                }
+            }
+        },
+        [this]() {  // 每日重置逻辑
+            feed_today = 1;
+        }
+    );
+    // 初始化收获组件
+    harvester.setupDynamic(
+        [this]() { return _model ? _model->produceItem : ""; },  // 动态获取产品名称
+        EXPERIENCE,                                                // 经验值
+        [this]() {                                                 // 收获后清理
+            produce->setTexture(transparent_texture);
+            is_produce = 0;
+        }
+    );
     if (transparent_texture == nullptr) {
         int dataSize = size.width * size.height * 4;
         unsigned char* transparentData = new unsigned char[dataSize];
@@ -139,23 +182,15 @@ void animals::create_produce()
 {
     if (!_model) return;
 
-    if (feed_count % _model->produceCycle == 0 && feed_count)
-    {
-        produce->setSpriteFrame(_model->id + "-produce.png");//��ʾ������
-        is_produce = 1;
-        CCLOG("create produce: %s", (_model->id + "-produce.png").c_str());
-    }
+    // 使用进度追踪组件检查并触发产出
+    feedTracker.checkAndTrigger();
 }
 
 // 收获功能
 void animals::harvest()
 {
-    //backpackLayer->addItem(PRODUCE_MAP.at(animals_name));
-    backpackLayer->addItem(_model->produceItem);
-    Player* player = Player::getInstance("me");
-    player->playerproperty.addExperience(EXPERIENCE);
-    produce->setTexture(transparent_texture);
-    is_produce = 0;
+    // 使用收获组件执行收获逻辑
+    harvester.harvest();
 }
 
 
@@ -252,18 +287,8 @@ void animals::scheduleRandomMove(cocos2d::TMXTiledMap* tileMap) {
 // 新一天更新
 void animals::update_day(float deltaTime)
 {
-    if (timeSystem->getDay() != now_day)
-    {
-        if (_model) {
-            if (feed_today == 0)// 说明今天喂过了
-            {
-                feed_count++;
-                this->create_produce();
-            }
-        }
-        now_day = timeSystem->getDay();
-        feed_today = 1;
-    }
+    // 使用每日更新组件
+    dailyUpdater.update(deltaTime);
 }
 
 AnimalsManager* AnimalsManager::create()

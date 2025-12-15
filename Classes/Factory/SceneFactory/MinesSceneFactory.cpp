@@ -428,6 +428,9 @@ void MinesSceneProduct::onMouseClick(Event* event) {
 // 功能：切换场景
 //----------------------------------------------------
 void MinesSceneProduct::changeScene(Event* event) {
+
+    InteractionManager::getInstance()->startListening(this->getEventDispatcher());
+    CCLOG("MinesScenelInteractionManager started listening.");
     auto mouseEvent = dynamic_cast<EventMouse*>(event);
     if (!mouseEvent) {
         return;

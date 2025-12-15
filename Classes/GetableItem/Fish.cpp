@@ -2,39 +2,39 @@
 #include "Data/GameData.h"
 
 #define MAG_TIME_CROP 1.5f
-// ¶¨Òå¾²Ì¬³ÉÔ±±äÁ¿²¢³õÊ¼»¯
+// ï¿½ï¿½ï¿½å¾²Ì¬ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
 cocos2d::Texture2D* fish::transparent_texture = nullptr;
 cocos2d::Size fish::fish_size = cocos2d::Size(0, 0);
 
-// ´´½¨ÊµÀý
+// ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
 fish* fish::create(const std::string& plist_name, float width, float height)
 {
-    //¼ÓÔØplistÎÄ¼þ
+    //ï¿½ï¿½ï¿½ï¿½plistï¿½Ä¼ï¿½
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
     fish_size.width = width;
     fish_size.height = height;
 
-    //´´½¨ÊµÀý
+    //ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     fish* fish_sprite = new fish();
     fish_sprite->setFishType("bluefish");
 
-    // ´´½¨Í¸Ã÷µÄÄÚ´æ¿é£¬ÉèÖÃÎªÈ«Í¸Ã÷ (RGBA8888 ¸ñÊ½)
-    int dataSize = width * height * 4;  // Ã¿¸öÏñËØ 4 ×Ö½Ú£¨RGBA ¸ñÊ½£©
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½é£¬ï¿½ï¿½ï¿½ï¿½ÎªÈ«Í¸ï¿½ï¿½ (RGBA8888 ï¿½ï¿½Ê½)
+    int dataSize = width * height * 4;  // Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 4 ï¿½Ö½Ú£ï¿½RGBA ï¿½ï¿½Ê½ï¿½ï¿½
     unsigned char* transparentData = new unsigned char[dataSize];
 
-    // Ìî³äÍ¸Ã÷Êý¾Ý (Ã¿¸öÏñËØµÄ 4 ¸öÍ¨µÀÖµ¶¼Îª 0)
+    // ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ 4 ï¿½ï¿½Í¨ï¿½ï¿½Öµï¿½ï¿½Îª 0)
     memset(transparentData, 0, dataSize);
 
-    // ´´½¨Í¸Ã÷ÎÆÀí
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, width, height, cocos2d::Size(width, height));
     transparent_texture = transparentTexture;
 
-    // ÊÍ·ÅÄÚ´æ
+    // ï¿½Í·ï¿½ï¿½Ú´ï¿½
     delete[] transparentData;
 
 
-    //ÅÐ¶ÏÊÇ·ñÄÜ³É¹¦´´½¨
+    //ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½Ü³É¹ï¿½ï¿½ï¿½ï¿½ï¿½
     if (transparentTexture)
     {
         fish_sprite->initWithTexture(transparentTexture);
@@ -54,40 +54,40 @@ void fish::setFishType(const std::string& id)
     }
 }
 
-// ³õÊ¼»¯Êó±ê¼àÌýÆ÷
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void fish::init_mouselistener()
 {
-    // ´´½¨Êó±ê¼àÌýÆ÷
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     auto listener = cocos2d::EventListenerMouse::create();
-    // Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+    // ï¿½ï¿½ê°´ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
     listener->onMouseDown = CC_CALLBACK_1(fish::on_mouse_click, this);
-    // »ñÈ¡ÊÂ¼þ·Ö·¢Æ÷£¬Ìí¼Ó¼àÌýÆ÷
+    // ï¿½ï¿½È¡ï¿½Â¼ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½ï¿½ï¿½ï¿½
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
-// Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+// ï¿½ï¿½ê°´ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
 void fish::on_mouse_click(cocos2d::Event* event)
 {
-    //»ñÈ¡×÷ÎïÎ»ÖÃ
+    //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
     Vec2 fish_pos = this->convertToWorldSpace(Vec2(0, 0));
-    // ¼ÆËãµã»÷µÄÓÐÐ§·¶Î§
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½Î§
     float min_x = fish_pos.x;
     float max_x = fish_pos.x + fish_size.width * MapSize;
     float min_y = fish_pos.y;
     float max_y = fish_pos.y + fish_size.height * MapSize;
     if (is_in_control) {
-        //Êä³öÊó±êµã»÷Î»ÖÃºÍÓÐÐ§·¶Î§
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ãºï¿½ï¿½ï¿½Ð§ï¿½ï¿½Î§
         if ((MOUSE_POS.x > min_x &&
             MOUSE_POS.x < max_x &&
             MOUSE_POS.y > min_y &&
             MOUSE_POS.y < max_y))
         {
-                if (backpackLayer->getSelectedItem().find("Can") != std::string::npos) //ÊÖÉÏµÄ¹¤¾ßÎªË®ºø£¬Ö´ÐÐ½½Ë®
+                if (backpackLayer->getSelectedItem().find("Can") != std::string::npos) //ï¿½ï¿½ï¿½ÏµÄ¹ï¿½ï¿½ï¿½ÎªË®ï¿½ï¿½ï¿½ï¿½Ö´ï¿½Ð½ï¿½Ë®
                 {
                     CCLOG("water this crop");
                     this->water(backpackLayer->getSelectedItem());
                 }
-                else if (backpackLayer->getSelectedItem().find("Rod") != std::string::npos)//ÊÖÉÏµÄ¹¤¾ßÎªÓã¸Í
+                else if (backpackLayer->getSelectedItem().find("Rod") != std::string::npos)//ï¿½ï¿½ï¿½ÏµÄ¹ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½
                 {
                     CCLOG("doing fishing");
                     this->fishing(backpackLayer->getSelectedItem());
@@ -105,32 +105,32 @@ void fish::water(std::string name)
 {
     this->setSpriteFrame("water.png");
 
-    //±³°üË®+1
+    //ï¿½ï¿½ï¿½ï¿½Ë®+1
     backpackLayer->addItem(name);
     CCLOG("water successfully");
 }
   
-//µöÓã
+//ï¿½ï¿½ï¿½ï¿½
 void fish::fishing(std::string name)
 {
 
     auto sprite = cocos2d::Sprite::create("menu.png");
     if (sprite) {
-        // ÉèÖÃ¾«ÁéµÄÎ»ÖÃ£¨ÆÁÄ»ÖÐÐÄÎªÀý£©
+        // ï¿½ï¿½ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½
         auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
         auto origin = cocos2d::Director::getInstance()->getVisibleOrigin();
         sprite->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
 
-        // È·±£¾«ÁéÔÚ×îÉÏ²ã
-        sprite->setGlobalZOrder(1000); // ½Ï´óµÄÖµÈÃËüÔÚ¸üÉÏ²ãÏÔÊ¾
+        // È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï²ï¿½
+        sprite->setGlobalZOrder(1000); // ï¿½Ï´ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½Ï²ï¿½ï¿½ï¿½Ê¾
 
-        // Ìí¼Óµ½µ±Ç°³¡¾°
+        // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
         this->addChild(sprite);
         CCLOG("create sprite.");
 
-   // // ÑÓ³ÙÒ»ÃëºóÒþ²Ø¾«Áé
+   // // ï¿½Ó³ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½ï¿½
    // this->scheduleOnce([sprite](float dt) {
-   //     sprite->setVisible(false); // »òÕßÖ±½ÓÓÃ removeFromParent()
+   //     sprite->setVisible(false); // ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ removeFromParent()
    //     }, 1.0f, "hide_sprite");
     }
     else {
@@ -140,21 +140,32 @@ void fish::fishing(std::string name)
     std::string framename = _model->id + ".png";
     this->setSpriteFrame(framename);
 
-    //CCLOG("%s", HARVEST_FISH_MAP.at(fish_name));
-    CCLOG("Harvesting: %s", _model->harvestItem.c_str());
+    CCLOG("Fishing: %s", _model->harvestItem.c_str());
 
-    //°ÑÉú³ÉÎï¼ÓÈë±³°ü 
-    //backpackLayer->addItem(fish_name,1);
-    backpackLayer->addItem(_model->harvestItem, 1);
+    // é…ç½®æ”¶èŽ·ç»„ä»¶ï¼ˆåŠ¨æ€æ¨¡å¼ï¼‰
+    harvester.setupDynamic(
+        [this]() { return _model ? _model->harvestItem : ""; },  // åŠ¨æ€èŽ·å–é±¼çš„åç§°
+        EXPERIENCE,                                               // ç»éªŒå€¼
+        [this]() {                                                // æ”¶èŽ·åŽæ¸…ç†
+            // å¯ä»¥åœ¨è¿™é‡Œæ·»åŠ é’“é±¼åŽçš„æ¸…ç†é€»è¾‘ï¼ˆå¦‚æžœéœ€è¦ï¼‰
+            CCLOG("[Fish] Harvest completed");
+        }
+    );
 
-    //ÈËÎï¾­ÑéÔö¼Ó10
-    Player* player = Player::getInstance("me");
-    player->playerproperty.addExperience(EXPERIENCE);
+    // æ‰§è¡Œæ”¶èŽ·
+    this->harvest();
     CCLOG("fishing successfully");
 
 }
 
-//Çå³ý
+// æ”¶èŽ·
+void fish::harvest()
+{
+    // ä½¿ç”¨æ”¶èŽ·ç»„ä»¶æ‰§è¡Œæ”¶èŽ·é€»è¾‘
+    harvester.harvest();
+}
+
+//ï¿½ï¿½ï¿½
 void fish::clear()
 {
     //fish_name = "";

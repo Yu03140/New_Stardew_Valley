@@ -4,13 +4,14 @@
 #include "cocos2d.h"
 #include "Global/Global.h"
 #include "Data/GameModels.h"
+#include "Share/HarvestComponent.h"
 
 #define MAX_LEVEL 5
 #define DIE_DRY 4
 #define WATER_PRED 3
 #define EXPERIENCE 10
 
-//ÒÆÈë GameData
+//ï¿½ï¿½ï¿½ï¿½ GameData
 //const std::unordered_map<std::string, std::unordered_map<std::string, int>> FISH_MAP =
 //{
 //    {"bluefish",{{"develop_day",5},{"season",SPRING}}},
@@ -30,26 +31,30 @@ class fish : public cocos2d::Sprite
 private:
     //std::string fish_name= "bluefish";             
     FishModel* _model = nullptr;
+    HarvestComponent harvester;                  // æ”¶èŽ·ç»„ä»¶
 
     static cocos2d::Texture2D* transparent_texture;
     static cocos2d::Size fish_size;
 public:
-    // ´´½¨ÊµÀý
+    // ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
     static fish* create(const std::string& plist_name, float width, float height);
 
-    // ³õÊ¼»¯Êó±ê¼àÌýÆ÷
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void init_mouselistener();
 
-    // Êó±ê°´ÏÂÊ±µÄ»Øµ÷
+    // ï¿½ï¿½ê°´ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
     void on_mouse_click(cocos2d::Event* event);
 
-    // È¡Ë®¹¦ÄÜµÄÊµÏÖ
+    // È¡Ë®ï¿½ï¿½ï¿½Üµï¿½Êµï¿½ï¿½
     void water(std::string name);
 
-    // µöÓã
+    // ï¿½ï¿½ï¿½ï¿½
     void fishing(std::string name);
 
-    // Çå³ý
+    // æ”¶èŽ·
+    void harvest();
+
+    // ï¿½ï¿½ï¿½
     void clear();
 
     void setFishType(const std::string& id);

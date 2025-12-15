@@ -167,6 +167,50 @@ void crop::planting(std::string name) {
         develop_level = 1;
         // develop_day = ... // 删除
 
+        // 初始化浇水进度追踪组件
+        waterTracker.setup(
+            [this]() {
+                // 条件：浇水次数 > 生长阶段 * 每阶段天数
+                return _model && waterTracker.getCount() > develop_level * _model->developDays && develop_level < MAX_LEVEL;
+            },
+            [this]() {
+                // 动作：升级
+                develop_level++;
+                std::string framename = _model->id + "-" + std::to_string(develop_level) + ".png";
+                this->setSpriteFrame(framename);
+                CCLOG("[Crop] Level up to %d", develop_level);
+            }
+        );
+        waterTracker.reset();
+
+        // 初始化每日更新组件
+        dailyUpdater.setup(
+            [this]() { return timeSystem->getDay(); },  // 获取当前天数
+            [this]() {  // 每日执行的逻辑
+                if (_model && develop_level > 0) {
+                    if (watered_today) {
+                        CCLOG("unwater today");
+                        unwater_count++;
+                        if (unwater_count == DIE_DRY) {
+                            develop_level = -1;
+                            this->setSpriteFrame("-1.png");
+                            CCLOG("the crop die");
+                        }
+                    }
+                    else {
+                        // 使用进度追踪组件累计浇水次数
+                        waterTracker.increment();
+                        CCLOG("water successfully today, total count:%d", waterTracker.getCount());
+                        // 检查并触发升级
+                        waterTracker.checkAndTrigger();
+                    }
+                }
+            },
+            [this]() {  // 每日重置逻辑
+                watered_today = WATER_PRED + timeSystem->getweather();
+            }
+        );
+
         std::string framename = _model->id + "-1.png";
         this->setSpriteFrame(framename);
         this->setScale(MAG_TIME_CROP);
@@ -214,20 +258,14 @@ void crop::fertilize(std::string name)
 //丰收，每次收获增加EXPERIENCE经验值
 void crop::harvest()
 {
-    //把生成物加入背包 
-    //backpackLayer->addItem(HARVEST_MAP.at(crop_name));
-    backpackLayer->addItem(_model->harvestItem);
-    //人物经验增加10
-    Player* player = Player::getInstance("me");
-    player->playerproperty.addExperience(EXPERIENCE);
-    //清空土地
-    this->clear();
+    // 使用收获组件执行收获逻辑
+    harvester.harvest();
 }
 
 //清除
 void crop::clear()
 {
-    water_count = 0;
+    waterTracker.reset();
     unwater_count = 0;
     //develop_day = 0;
     develop_level = 0;
@@ -242,60 +280,8 @@ void crop::clear()
 //更新
 void crop::update_day(float deltaTime)
 {
-    if (timeSystem->getDay() != now_day)//今天结束了
-    {
-
-        //if (develop_level > 0) {
-        //    if (watered_today)//说明今天浇水次数没有达到要求
-        //    {
-        //        CCLOG("unwater today");
-        //        unwater_count++;
-        //        if (unwater_count == DIE_DRY) {
-        //            develop_level = -1;
-        //            this->setSpriteFrame("-1.png");
-        //            CCLOG("the crop die");
-        //        }
-        //    }
-        //    else//今天浇水达到要求
-        //    {
-        //        CCLOG("water successfully today:%d", water_count);
-        //        water_count++;
-        //        //查看是否需要更新成长状态
-        //        if (water_count > develop_level * develop_day && water_count <= MAX_LEVEL * develop_day) {
-        //            this->develop_level++;
-        //            //更新显示的成长状态
-        //            std::string framename = this->crop_name + "-" + std::to_string(this->develop_level) + ".png";
-        //            this->setSpriteFrame(framename);
-        //        }
-        //    }
-        //}
-        if (_model && develop_level > 0) {
-            if (watered_today)
-            {
-                CCLOG("unwater today");
-                unwater_count++;
-                if (unwater_count == DIE_DRY) {
-                    develop_level = -1;
-                    this->setSpriteFrame("-1.png");
-                    CCLOG("the crop die");
-                }
-            }
-            else
-            {
-                CCLOG("water successfully today:%d", water_count);
-                water_count++;
-
-                // 使用 _model->developDays
-                if (water_count > develop_level * _model->developDays && water_count <= MAX_LEVEL * _model->developDays) {
-                    this->develop_level++;
-                    std::string framename = _model->id + "-" + std::to_string(this->develop_level) + ".png";
-                    this->setSpriteFrame(framename);
-                }
-            }
-        }
-        now_day = timeSystem->getDay();
-        watered_today = WATER_PRED + timeSystem->getweather();
-    }
+    // 使用每日更新组件
+    dailyUpdater.update(deltaTime);
 }
 
 //【观察者模式】
