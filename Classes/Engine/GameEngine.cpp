@@ -1,6 +1,7 @@
 #include "GameEngine.h"
 #include "Global/Global.h" 
 #include "TaskBar/TaskBarLayer.h" 
+#include "Factory/SceneFactory/SceneFactoryRegistry.h"
 
 USING_NS_CC;
 
