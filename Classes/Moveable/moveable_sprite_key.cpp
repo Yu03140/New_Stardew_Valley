@@ -1,6 +1,6 @@
 #include "moveable_sprite_key.h"
 
-// ��̬��Ա��������
+// 静态成员变量初始化
 std::string moveable_sprite_key::sprite_name = "";
 std::string moveable_sprite_key_walk::sprite_name_walk = "";
 std::string moveable_sprite_key_tool::sprite_name_tool = "";
@@ -11,30 +11,30 @@ std::unordered_set<std::string> TOOLS_MAP =
 { "Axe1", "Rod1", "Hoe1", "Pick1", "Can1" ,"Axe2", "Rod2", "Hoe2", "Pick2", "Can2" };
 
 
-//����һ��moveable_sprite_key��ʵ��
+// 创建一个moveable_sprite_key的实例
 moveable_sprite_key* moveable_sprite_key::create(const std::string& plist_name, float width, float height)
 {
-    //����plist�ļ�
+    // 加载plist文件
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
 
-    //����ʵ��
+    // 创建实例
     moveable_sprite_key* sprite = new moveable_sprite_key();
 
-    // ����͸�����ڴ�飬����Ϊȫ͸�� (RGBA8888 ��ʽ)
-    int dataSize = width * height * 4;  // ÿ������ 4 �ֽڣ�RGBA ��ʽ��
+    // 创建透明纹理内存块，设置为全透明 (RGBA8888 格式)
+    int dataSize = width * height * 4;  // 每像素占 4 字节（RGBA 格式）
     unsigned char* transparentData = new unsigned char[dataSize];
 
-    // ���͸������ (ÿ�����ص� 4 ��ͨ��ֵ��Ϊ 0)
+    // 填充透明数据 (每个像素的 4 个通道值均为 0)
     memset(transparentData, 0, dataSize);
 
-    // ����͸������
+    // 创建透明纹理
     cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, width, height, cocos2d::Size(width, height));
     transparent_texture = transparentTexture;
 
-    // �ͷ��ڴ�
+    // 释放内存
     delete[] transparentData;
-    //�ж��Ƿ��ܳɹ�����
+    // 判断是否能成功创建
     if (transparentTexture)
     {
         sprite->initWithTexture(transparentTexture);
@@ -48,21 +48,21 @@ moveable_sprite_key* moveable_sprite_key::create(const std::string& plist_name, 
     return nullptr;
 }
 
-//���̼�����
+// 键盘监听器
 void moveable_sprite_key::init_keyboardlistener()
 {
     // 先移除旧的监听器，避免重复注册
     _eventDispatcher->removeEventListenersForTarget(this);
-    // �������̼�����
+    // 创建键盘监听器
     auto listener = cocos2d::EventListenerKeyboard::create();
 
-    // ��������ʱ�Ļص�
+    // 键盘按下时的回调
     listener->onKeyPressed = CC_CALLBACK_2(moveable_sprite_key::onKeyPressed, this);
 
-    // �����ͷ�ʱ�Ļص�
+    // 键盘释放时的回调
     listener->onKeyReleased = CC_CALLBACK_2(moveable_sprite_key::onKeyReleased, this);
 
-    // ��ȡ�¼��ַ��������Ӽ�����
+    // 获取事件分发器并添加监听器
     // 关键修复：使用固定优先级1，确保玩家精灵的键盘监听器优先于场景的监听器（优先级-1）
     // 重要：需要保留监听器，防止被自动释放
     listener->retain();
@@ -71,29 +71,29 @@ void moveable_sprite_key::init_keyboardlistener()
 
 }
 
-//���¼���ʱ������Ӧ��������޸�Ϊtrue
+// 按下键盘时，将对应的运动修改为true
 void moveable_sprite_key::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event)
 {
     CCLOG("moveable_sprite_key::onKeyPressed() called with keyCode: %d", static_cast<int>(keyCode));
     if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_UP_ARROW)
     {
-        movement[0] = true; // ��
+        movement[0] = true; // 上
     }
     else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_DOWN_ARROW)
     {
-        movement[1] = true; // ��
+        movement[1] = true; // 下
     }
     else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_LEFT_ARROW)
     {
-        movement[2] = true; // ��
+        movement[2] = true; // 左
     }
     else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_RIGHT_ARROW)
     {
-        movement[3] = true; // ��
+        movement[3] = true; // 右
     }
 }
 
-//�ɿ����̺󣬽���Ӧ��������޸Ļ�false
+// 松开按键后，将对应的运动修改回false
 void moveable_sprite_key::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event)
 {
     CCLOG("moveable_sprite_key::onKeyReleased() called with keyCode: %d", static_cast<int>(keyCode));
@@ -115,22 +115,22 @@ void moveable_sprite_key::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode,
         movement[3] = false;
     }
 
-    // �ɿ�����ʱ��ֹͣ���ж���
+    // 松开按键时，停止所有动作
     this->stopAllActions();
     isAnimating = false;
 
 }
 
-//����λ��
+// 更新位置
 void moveable_sprite_key::update(float deltaTime)
 {
-    //�����Ƿ񵽴�߽���жϽ��,�ֱ�Ϊ��������
+    // 检测是否到达边界进行判断结果,分别为上下左右
     bool is_hit_edge[4] = { false,false, false, false };
 
-    //��ȡ�����λ��
+    // 获取精灵位置
     sprite_pos = this->getPosition();
 
-    //��ȡ���ڵĴ�С��Ϣ
+    // 获取窗口的大小信息
     cocos2d::Size visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
     cocos2d::Vec2 origin = cocos2d::Director::getInstance()->getVisibleOrigin();
     // 计算地图边界（地图中心在屏幕中心，锚点为0.5,0.5）
@@ -168,63 +168,63 @@ void moveable_sprite_key::update(float deltaTime)
             move_act(i);
     }
 
-    //��ȡ�����λ��
+    // 更新精灵位置
     sprite_pos = this->getPosition();
 }
 
-//�����ƶ�ָ��
+// 具体移动指令
 void moveable_sprite_key::move_act(int direction)
 {
-    //�������ӦͼƬ��׺
+    // 构建对应图片后缀
     std::string dic[4] = { "-back","-front","-left","-right" };
     this->setSpriteFrame(sprite_name + dic[direction] + ".png");
-    //�����ƶ�����
+    // 执行移动动作
     auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[direction], move_vecy[direction]));
     this->runAction(move_action);
 }
 
-// ȷ���� onEnter ���������Ӽ�����
+// 确保在 onEnter 中添加监听器
 void moveable_sprite_key::onEnter() {
-    Sprite::onEnter();  // ��֤����� onEnter ������
+    Sprite::onEnter();  // 确保调用 onEnter 方法
     
-    // ���Ƴ��ɵļ������������ظ�ע��
+    // 先移除旧的监听器，避免重复注册
     //_eventDispatcher->removeEventListenersForTarget(this);
     
-    // ���³�ʼ��������
+    // 重新初始化监听器
     init_keyboardlistener();
     CCLOG("moveable_sprite_key::onEnter() - keyboard listener initialized");
 }
 
-// ȷ���� onExit ���Ƴ�������
+// 确保在 onExit 中移除监听器
 void moveable_sprite_key::onExit() {
-    _eventDispatcher->removeEventListenersForTarget(this);  // �Ƴ�������
-    Sprite::onExit();  // ��֤����� onExit ������
+    _eventDispatcher->removeEventListenersForTarget(this);  // 移除监听器
+    Sprite::onExit();  // 确保调用 onExit 方法
 }
 
 
-//����moveable_sprite_key_walkʵ��
+// 创建moveable_sprite_key_walk实例
 moveable_sprite_key_walk* moveable_sprite_key_walk::create(const std::string& plist_name, const std::string& sprite_framename)
 
 {
-    //����plist�ļ�
+    // 加载plist文件
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
 
-    //ͬ�������ͼ������
+    // 同步保存精灵名字
     sprite_name_walk = sprite_framename;
 
-    //����ʵ��
+    // 创建实例
     std::string default_framename = sprite_name_walk + "-front.png";
     moveable_sprite_key_walk* sprite = new moveable_sprite_key_walk();
 
-    // ��ȡָ������֡
+    // 获取指定精灵帧
     cocos2d::SpriteFrame* frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(default_framename);
 
-    //�ж��Ƿ��ܳɹ�����
+    // 判断是否能成功创建
     if (frame)
     {
         sprite->initWithSpriteFrame(frame);
         sprite->autorelease();
-        sprite->setScale(6.0f);  // ������Ŵ� 6 ��
+        sprite->setScale(6.0f);  // 将精灵放大 6 倍
         sprite->init_keyboardlistener();
         CCLOG("Creation moveable_sprite_key_walk successfully!");
         return sprite;
@@ -234,31 +234,31 @@ moveable_sprite_key_walk* moveable_sprite_key_walk::create(const std::string& pl
     return nullptr;
 }
 
-//���ɴ����ƶ��������ƶ�ָ��
+// 根据产生鼠标移动调整的移动指令
 void moveable_sprite_key_walk::move_act(int direction)
 {
-    //�������ӦͼƬ��׺
+    // 构建对应图片后缀
     std::string dic[4] = { "-back","-front","-left","-right" };
 
-    //�����ƶ�����
+    // 执行移动动作
     auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[direction], move_vecy[direction]));
-    //��������
+    // 添加帧动画
     cocos2d::Vector<cocos2d::SpriteFrame*> frames;
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + ".png"));
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + "2.png"));
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + "3.png"));
     frames.pushBack(cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(sprite_name_walk + dic[direction] + "4.png"));
-    // ������������
-    auto animation = cocos2d::Animation::createWithSpriteFrames(frames, 0.1f); // ÿ֡��� 0.1s
+    // 创建帧动画序列
+    auto animation = cocos2d::Animation::createWithSpriteFrames(frames, 0.1f); // 每帧持续 0.1s
     auto animate = cocos2d::Animate::create(animation);
     auto repeat = cocos2d::RepeatForever::create(animate);
 
     this->runAction(move_action);
-    // �����û���ڲ��Ŷ������ſ�ʼ����
+    // 如果用户没有在播放动画才开始播放
     if (!isAnimating) {
-        // ִ���ƶ��Ͷ���
+        // 执行移动和动画
         this->runAction(repeat);
-        isAnimating = true;  // ��Ƕ������ڲ���
+        isAnimating = true;  // 标记动画正在播放
     }
 
     character_pos = this->getPosition();
@@ -277,7 +277,7 @@ void moveable_sprite_key_walk::update(float deltaTime) {
     // 先调用基类的update
     moveable_sprite_key::update(deltaTime);
     
-    // 更新character_pos全局变量（确保所有场景都能正确更新）
+    // 更新character_pos全局变量（确保所有场景都能正确更新） 
     character_pos = this->getPosition();
     
     // 如果有目标位置，自动移动到目标
@@ -338,33 +338,33 @@ cocos2d::Vec2 moveable_sprite_key_walk::get_pos()
 
 moveable_sprite_key_tool* moveable_sprite_key_tool::create(const std::string& plist_name)
 {
-    //����plist�ļ�
+    // 加载plist文件
     cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist_name);
 
-    //����ʵ��
+    // 创建实例
     moveable_sprite_key_tool* sprite = new moveable_sprite_key_tool();
 
-    // ����͸�����ڴ�飬����Ϊȫ͸�� (RGBA8888 ��ʽ)
-    int dataSize = TOOL_HEIGHT * TOOL_WIDTH * 4;  // ÿ������ 4 �ֽڣ�RGBA ��ʽ��
+    // 创建透明纹理内存块，设置为全透明 (RGBA8888 格式)
+    int dataSize = TOOL_HEIGHT * TOOL_WIDTH * 4;  // 每像素占 4 字节（RGBA 格式）
     unsigned char* transparentData = new unsigned char[dataSize];
 
-    // ���͸������ (ÿ�����ص� 4 ��ͨ��ֵ��Ϊ 0)
+    // 填充透明数据 (每个像素的 4 个通道值均为 0)
     memset(transparentData, 0, dataSize);
 
-    // ����͸������
+    // 创建透明纹理
     cocos2d::Texture2D* transparentTexture = new cocos2d::Texture2D();
     transparentTexture->initWithData(transparentData, dataSize, cocos2d::backend::PixelFormat::RGBA8888, TOOL_WIDTH, TOOL_HEIGHT, cocos2d::Size(TOOL_WIDTH, TOOL_HEIGHT));
     transparent_texture = transparentTexture;
 
-    // �ͷ��ڴ�
+    // 释放内存
     delete[] transparentData;
 
-    //�ж��Ƿ��ܳɹ�����
+    // 判断是否能成功创建
     if (transparentTexture)
     {
         sprite->initWithTexture(transparentTexture);
         sprite->autorelease();
-        sprite->setScale(3.0f);  // ������Ŵ� 3 ��
+        sprite->setScale(3.0f);  // 将精灵放大 3 倍
         sprite->init_keyboardlistener();
         CCLOG("Creation moveable_sprite_key_tool successfully!");
         return sprite;
@@ -376,10 +376,10 @@ moveable_sprite_key_tool* moveable_sprite_key_tool::create(const std::string& pl
 
 void moveable_sprite_key_tool::update(float deltaTime) {
 
-    // �ȵ��ø���� update
+    // 先调用父类的 update
     moveable_sprite_key::update(deltaTime);
 
-    //����������ڵĹ����뱳��ѡ�еĲ�һ�£��������
+    // 如果当前手中的工具与背包选中的不一致，更新纹理
     // 关键修复：检查 backpackLayer 是否有效，防止访问已销毁的对象
     if (!backpackLayer) {
         return;
@@ -388,7 +388,7 @@ void moveable_sprite_key_tool::update(float deltaTime) {
     std::string selectedItem = backpackLayer->getSelectedItem();
     if (selectedItem != sprite_name_tool) {
         sprite_name_tool = selectedItem;
-        //�������ƷΪ���ߣ�����Ҫ�淽�����
+        // 如果该物品为工具，需要变方向纹理
         if (sprite_name_tool != "") {
             if (TOOLS_MAP.count(selectedItem)) {
                 this->setSpriteFrame(sprite_name_tool + direc + ".png");
@@ -402,41 +402,41 @@ void moveable_sprite_key_tool::update(float deltaTime) {
     }
 }
 
-//�����ƶ�ָ��
+// 具体移动指令
 void moveable_sprite_key_tool::move_act(int direction)
 {
     std::string dic[4] = { "-back","-front","-left","-right" };
     if (sprite_name_tool != "") {
         if (TOOLS_MAP.count(backpackLayer->getSelectedItem())) {
-            //�������ӦͼƬ��׺
+            // 构建对应图片后缀
             this->setSpriteFrame(sprite_name_tool + dic[direction] + ".png");
         }
     }
     direc = dic[direction];
 
-    //�����ƶ�����
+    // 执行移动动作
     auto move_action = cocos2d::MoveBy::create(0.1f, cocos2d::Vec2(move_vecx[direction], move_vecy[direction]));
     this->runAction(move_action);
 }
 
-//// ��ʼ����������
+//// 初始化鼠标监听器
 //void moveable_sprite_key_tool::init_mouselistener()
 //{
 //    // 先移除旧的鼠标监听器，避免重复注册
 //    _eventDispatcher->removeEventListenersForTarget(this);
 //
-//    // ������������
+//    // 创建鼠标监听器
 //    auto listener = cocos2d::EventListenerMouse::create();
 //
-//    // ��갴��ʱ�Ļص�
+//    // 鼡标按下时的回调
 //    listener->onMouseDown = CC_CALLBACK_1(moveable_sprite_key_tool::on_mouse_click, this);
 //
-//    // ��ȡ�¼��ַ��������Ӽ�����
+//    // 获取事件分发器并添加监听器
 //    // 关键修复：使用固定优先级2，确保工具精灵的监听器在场景监听器（优先级1）之后但在精灵监听器之前处理
 //    _eventDispatcher->addEventListenerWithFixedPriority(listener, 2);
 //}
 //
-//// ��갴��ʱ�Ļص�
+//// 鼡标按下时的回调
 //void moveable_sprite_key_tool::on_mouse_click(cocos2d::Event* event)
 //{
 //    
@@ -462,10 +462,10 @@ void moveable_sprite_key_tool::move_act(int direction)
 //              mouse_pos.x, mouse_pos.y, character_pos.x, character_pos.y);
 //        if (TOOLS_MAP.count(sprite_name_tool)) {
 //            CCLOG("tool click!");
-//            // �л�����
+//            // 切换纹理
 //            this->setSpriteFrame(sprite_name_tool + direc + "-clicked.png");
 //
-//            // �� 0.2 ���ָ�ԭͼ
+//            // 在 0.2 秒后恢复原图
 //            this->scheduleOnce([this](float dt) {
 //                if (sprite_name_tool != "")
 //                    this->setSpriteFrame(sprite_name_tool + direc + ".png");
@@ -477,7 +477,6 @@ void moveable_sprite_key_tool::move_act(int direction)
 //        CCLOG("Tool: NOT IN CONTROL, mouse_pos=(%f, %f), character_pos=(%f, %f)", 
 //              mouse_pos.x, mouse_pos.y, character_pos.x, character_pos.y);
 //    }
-//
 //}
 
 // 【观察者模式：播放点击动画】

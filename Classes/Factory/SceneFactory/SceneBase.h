@@ -8,7 +8,7 @@
 #include "Global/Global.h"
 
 
-// ��������ö��
+// 场景类型枚举
 enum class SceneType {
     FARMGROUND_SCENE,
     MINES_SCENE,
@@ -22,37 +22,37 @@ class SceneBase : public cocos2d::Scene {
 public:
     virtual ~SceneBase() = default;
 
-    // �������� - �������峡��
+    // 创建场景 - 由子类各自实现
     //static cocos2d::Scene* createScene();
 
-    // ��ʼ���ӿ�
+    // 初始化接口
     virtual bool init() override;
 
-    // ͨ�ýӿ�
+    // 通用接口
     virtual void onEnter() override;
     virtual void onEnterTransitionDidFinish() override;
     virtual void onExit() override;
     virtual void update(float delta) override;
 
-    // �������е�ͨ�÷���
+    // 所有场景的通用方法
     virtual void initMouseListener();
     virtual void initKeyboardListener();
     //virtual void updateCameraPosition(float dt, cocos2d::Node* player);
 
-    // ��ȡ������Ϣ
+    // 获取场景信息
     virtual SceneType getSceneType() const = 0;
     virtual std::string getSceneName() const = 0;
 
-    // �����л����
+    // 场景切换相关
     //virtual void beforeLeave();
     //virtual void afterEnter();
 
-    // ͨ�����Է�����
+    // 通用属性访问器
     cocos2d::TMXTiledMap* getTileMap() const { return tileMap; }
     BackpackLayer* getBackpackLayer() const { return backpackLayer; }
     const cocos2d::Size& getSceneSize() const { return sceneSize; }
 
-    // ���ñ����㣨���ڳ����л�ʱ�������ӣ�
+    // 设置背包层（用于场景切换时保留引用）
     void setBackpackLayer(BackpackLayer* layer) { backpackLayer = layer; }
     
     // 设置场景参数
@@ -61,48 +61,48 @@ public:
         mapScale = scale;
     }
 
-	// ͨ�ó�ʼ������
+	// 通用初始化方法
     virtual void loadTileMap(const std::string& tmxFile, float scale = 4.0f);
     virtual void setupBackpackLayer();
 
 protected:
-    // ͨ������
+    // 通用属性
     cocos2d::TMXTiledMap* tileMap = nullptr;
     BackpackLayer* backpackLayer = nullptr;
     cocos2d::Size sceneSize;
     float mapScale = 4.0f;
     std::string tileMapFile;
 
-    // ���������
+    // 鼠标监听器
     cocos2d::EventListenerMouse* mouseListener = nullptr;
     
     // 键盘监听器
     cocos2d::EventListenerKeyboard* keyboardListener = nullptr;
 
-    // ������������
+    // 摄像机跟随玩家
     bool cameraFollowsPlayer = true;
 
-    // ͨ�ó�ʼ������
+    // 通用初始化方法
     //virtual void loadTileMap(const std::string& tmxFile, float scale = 4.0f) ;
     //virtual void setupBackpackLayer();
     virtual void setupPlayer();
     virtual void setupUI();
 
-    // �¼�����
+    // 事件处理
     virtual void onMouseClick(cocos2d::Event* event);
     virtual void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
     virtual void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
 
-    // ���ߺ���
+    // 辅助函数
     cocos2d::Vec2 convertToTilePosition(const cocos2d::Vec2& worldPosition);
     bool isPositionInMap(const cocos2d::Vec2& position);
     void clampToMapBoundary(cocos2d::Node* node);
 
 private:
-    // ��ʼ�����������
+    // 初始化键盘监听器
     //void initKeyboardListener();
 
-    // ����ֵ�ķ�Χ
+    // 限制值的范围
     template <typename T>
     T clamp(T value, T low, T high) {
         if (value < low) return low;

@@ -11,7 +11,7 @@
 #define WATER_PRED 3
 #define EXPERIENCE 10
 
-//���� GameData
+// 移动到 GameData
 //const std::unordered_map<std::string, std::unordered_map<std::string, int>> FISH_MAP =
 //{
 //    {"bluefish",{{"develop_day",5},{"season",SPRING}}},
@@ -36,25 +36,25 @@ private:
     static cocos2d::Texture2D* transparent_texture;
     static cocos2d::Size fish_size;
 public:
-    // ����ʵ��
+    // 创建实例
     static fish* create(const std::string& plist_name, float width, float height);
 
-    // ��ʼ����������
+    // 初始化鼠标监听器
     void init_mouselistener();
 
-    // ��갴��ʱ�Ļص�
+    // 鼠标按下时的回调
     void on_mouse_click(cocos2d::Event* event);
 
-    // ȡˮ���ܵ�ʵ��
+    // 取水功能的实现
     void water(std::string name);
 
-    // ����
+    // 钓鱼
     void fishing(std::string name);
 
     // 收获
     void harvest();
 
-    // ���
+    // 清除
     void clear();
 
     void setFishType(const std::string& id);

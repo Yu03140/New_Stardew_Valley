@@ -6,23 +6,23 @@ USING_NS_CC;
 
 //----------------------------------------------------
 // SceneBase::createScene()
-// ���ܣ���������ʵ��
+// 功能：创建场景实例
 //----------------------------------------------------
 //Scene* SceneBase::createScene() {
-//    // �ɾ�������ʵ��
+//    // 由具体子类实现
 //    return nullptr;
 //}
 
 //----------------------------------------------------
 // SceneBase::init()
-// ���ܣ���ʼ����������
+// 功能：初始化场景基类
 //----------------------------------------------------
 bool SceneBase::init() {
     if (!Scene::init()) {
         return false;
     }
 
-    // ��ʼ�����������
+    // 初始化监听器（统一在基类初始化，子类不需要重复调用）
     // 初始化鼠标和键盘监听器（统一在基类初始化，子类不需要重复调用）
     initMouseListener();
     initKeyboardListener();
@@ -32,7 +32,7 @@ bool SceneBase::init() {
 
 //----------------------------------------------------
 // SceneBase::onEnter()
-// ���ܣ���������ʱ����
+// 功能：场景进入时调用
 //----------------------------------------------------
 void SceneBase::onEnter() {
     Scene::onEnter();
@@ -50,7 +50,7 @@ void SceneBase::onEnterTransitionDidFinish() {
 
 //----------------------------------------------------
 // SceneBase::onExit()
-// ���ܣ������˳�ʱ����
+// 功能：场景退出时调用
 //----------------------------------------------------
 void SceneBase::onExit() {
     // 关键修复：移除键盘监听器，防止场景销毁后仍然触发回调导致悬空指针
@@ -75,16 +75,16 @@ void SceneBase::onExit() {
 
 //----------------------------------------------------
 // SceneBase::update()
-// ���ܣ�ÿ֡����
+// 功能：每帧更新
 //----------------------------------------------------
 void SceneBase::update(float delta) {
     Scene::update(delta);
-    // ��������߼�������������չ��
+    // 基类更新逻辑，子类可以扩展
 }
 
 //----------------------------------------------------
 // SceneBase::initMouseListener()
-// ���ܣ���ʼ����������
+// 功能：初始化鼠标监听器
 //----------------------------------------------------
 void SceneBase::initMouseListener() {
     if (mouseListener) {
@@ -107,7 +107,7 @@ void SceneBase::initMouseListener() {
 
 //----------------------------------------------------
 // SceneBase::initKeyboardListener()
-// ���ܣ���ʼ�����̼�����
+// 功能：初始化键盘监听器
 //----------------------------------------------------
 void SceneBase::initKeyboardListener() {
     // 如果已经存在监听器，先移除它
@@ -145,13 +145,13 @@ void SceneBase::initKeyboardListener() {
 
 //----------------------------------------------------
 // SceneBase::loadTileMap()
-// ���ܣ�������Ƭ��ͼ
+// 功能：加载瓦片地图
 //----------------------------------------------------
 void SceneBase::loadTileMap(const std::string& tmxFile, float scale) {
     tileMapFile = tmxFile;
     mapScale = scale;
 
-    // �����ͼ�Ѿ����ڣ����Ƴ���
+    // 如果地图已经存在，先移除它
     if (tileMap) {
         this->removeChild(tileMap);
         tileMap = nullptr;
@@ -170,7 +170,7 @@ void SceneBase::loadTileMap(const std::string& tmxFile, float scale) {
 
         this->addChild(tileMap, 0);
 
-        // ���㳡���ߴ�
+        // 计算场景尺寸
         Size mapContentSize = tileMap->getContentSize();
         sceneSize = Size(mapContentSize.width * scale, mapContentSize.height * scale);
         
@@ -188,10 +188,10 @@ void SceneBase::loadTileMap(const std::string& tmxFile, float scale) {
 
 //----------------------------------------------------
 // SceneBase::setupBackpackLayer()
-// ���ܣ����ñ�����
+// 功能：设置背包层
 //----------------------------------------------------
 void SceneBase::setupBackpackLayer() {
-    // ����������Ѿ����ڣ����Ƴ�
+    // 如果背包层已经存在，先移除
     if (this->getChildByName("backpackLayer")) {
         this->removeChildByName("backpackLayer");
     }
@@ -208,7 +208,7 @@ void SceneBase::setupBackpackLayer() {
         this->addChild(backpackLayer, Backpacklayer);
         backpackLayer->setName("backpackLayer");
 
-        // ���ó�ʼλ��
+        // 设置初始位置
         // 设置背包层位置（BackpackLayer内部的tilemap已经自己定位了，所以这里设置为原点即可）
         backpackLayer->setPosition(Vec2(0, 0));
     }
@@ -219,7 +219,7 @@ void SceneBase::setupBackpackLayer() {
 
 //----------------------------------------------------
 // SceneBase::updateCameraPosition()
-// ���ܣ����������λ��
+// 功能：更新摄像机位置
 //----------------------------------------------------
 //void SceneBase::updateCameraPosition(float dt, Node* player) {
 //    if (!cameraFollowsPlayer || !player || sceneSize.width == 0 || sceneSize.height == 0) {
@@ -229,13 +229,13 @@ void SceneBase::setupBackpackLayer() {
 //    auto playerPosition = player->getPosition();
 //    auto visibleSize = Director::getInstance()->getVisibleSize();
 //
-//    // ���������Ӧ���ڵ�ͼ�߽��ڵ�λ��
+//    // 计算摄像机应该在的地图边界内的位置
 //    float minCameraX = visibleSize.width / 2;
 //    float maxCameraX = sceneSize.width - visibleSize.width / 2;
 //    float minCameraY = visibleSize.height / 2;
 //    float maxCameraY = sceneSize.height - visibleSize.height / 2;
 //
-//    // �����ͼ����ĻС���������ʾ
+//    // 如果地图小于屏幕大小，居中显示
 //    if (maxCameraX < minCameraX) {
 //        minCameraX = maxCameraX = sceneSize.width / 2;
 //    }
@@ -246,12 +246,12 @@ void SceneBase::setupBackpackLayer() {
 //    float cameraX = clamp(playerPosition.x, minCameraX, maxCameraX);
 //    float cameraY = clamp(playerPosition.y, minCameraY, maxCameraY);
 //
-//    // ��ȡĬ������ͷ
+//    // 获取默认摄像头
 //    auto camera = Director::getInstance()->getRunningScene()->getDefaultCamera();
 //    if (camera) {
 //        camera->setPosition3D(Vec3(cameraX, cameraY, camera->getPosition3D().z));
 //
-//        // ����UIλ��
+//        // 更新UI位置
 //        float offsetX = cameraX - visibleSize.width / 2;
 //        float offsetY = cameraY - visibleSize.height / 2;
 //
@@ -263,7 +263,7 @@ void SceneBase::setupBackpackLayer() {
 
 //----------------------------------------------------
 // SceneBase::onMouseClick()
-// ���ܣ�������¼�����
+// 功能：鼠标点击事件处理
 //----------------------------------------------------
 void SceneBase::onMouseClick(Event* event) {
     auto mouseEvent = dynamic_cast<EventMouse*>(event);
@@ -278,50 +278,50 @@ void SceneBase::onMouseClick(Event* event) {
     auto camera = Director::getInstance()->getRunningScene()->getDefaultCamera();
     auto visibleSize = Director::getInstance()->getVisibleSize();
 
-    // ת������������
+    // 转换为世界坐标
     if (camera) {
         Vec2 cameraPosition = camera->getPosition();
         Vec2 windowOrigin = cameraPosition - Vec2(visibleSize.width / 2, visibleSize.height / 2);
         mousePosition += windowOrigin;
     }
 
-    // ����ȫ�����λ�ã�������ȫ�ֱ�����
+    // 更新全局鼠标位置，供其他模块使用
     MOUSE_POS = mousePosition;
     CCLOG("Mouse click at: (%f, %f)", MOUSE_POS.x, MOUSE_POS.y);
 }
 
 //----------------------------------------------------
 // SceneBase::onKeyPressed()
-// ���ܣ����������¼�����
+// 功能：键盘按下事件处理
 //----------------------------------------------------
 void SceneBase::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event) {
-    // ����ʵ�֣��������д
+    // 基类实现，子类可覆写
     CCLOG("Key pressed: %d", static_cast<int>(keyCode));
 }
 
 //----------------------------------------------------
 // SceneBase::onKeyReleased()
-// ���ܣ������ͷ��¼�����
+// 功能：键盘释放事件处理
 //----------------------------------------------------
 void SceneBase::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event) {
-    // ����ʵ�֣��������д
+    // 基类实现，子类可覆写
     CCLOG("Key released: %d", static_cast<int>(keyCode));
 }
 
 //----------------------------------------------------
 // SceneBase::beforeLeave()
-// ���ܣ��뿪����ǰ����
+// 功能：离开场景前调用
 //----------------------------------------------------
 //void SceneBase::beforeLeave() {
 //    CCLOG("Preparing to leave scene: %s", getSceneName().c_str());
 //
-//    // �Ƴ���������
+//    // 移除鼠标监听器
 //    if (mouseListener) {
 //        _eventDispatcher->removeEventListener(mouseListener);
 //        mouseListener = nullptr;
 //    }
 //
-//    // ���汳�������ã��Ա���������������������
+//    // 保存背包层引用，以便在下一个场景中恢复
 //    if (backpackLayer) {
 //        backpackLayer->retain();
 //        backpackLayer->removeFromParent();
@@ -330,18 +330,18 @@ void SceneBase::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event) {
 
 //----------------------------------------------------
 // SceneBase::afterEnter()
-// ���ܣ����볡�������
+// 功能：进入场景后调用
 //----------------------------------------------------
 //void SceneBase::afterEnter() {
 //    CCLOG("Finished entering scene: %s", getSceneName().c_str());
 //
-//    // ���³�ʼ����������
+//    // 重新初始化鼠标监听器
 //    initMouseListener();
 //}
 
 //----------------------------------------------------
 // SceneBase::convertToTilePosition()
-// ���ܣ���������ת��Ϊ��Ƭ����
+// 功能：世界坐标转换为瓦片坐标
 //----------------------------------------------------
 Vec2 SceneBase::convertToTilePosition(const Vec2& worldPosition) {
     if (!tileMap) return Vec2::ZERO;
@@ -357,7 +357,7 @@ Vec2 SceneBase::convertToTilePosition(const Vec2& worldPosition) {
 
 //----------------------------------------------------
 // SceneBase::isPositionInMap()
-// ���ܣ����λ���Ƿ��ڵ�ͼ��
+// 功能：检查位置是否在地图内
 //----------------------------------------------------
 bool SceneBase::isPositionInMap(const Vec2& position) {
     if (!tileMap) return false;
@@ -373,7 +373,7 @@ bool SceneBase::isPositionInMap(const Vec2& position) {
 
 //----------------------------------------------------
 // SceneBase::clampToMapBoundary()
-// ���ܣ����ƽڵ��ڵ�ͼ�߽���
+// 功能：限制节点在地图边界内
 //----------------------------------------------------
 void SceneBase::clampToMapBoundary(Node* node) {
     if (!node || !tileMap) return;
@@ -396,16 +396,16 @@ void SceneBase::clampToMapBoundary(Node* node) {
 
 //----------------------------------------------------
 // SceneBase::setupPlayer()
-// ���ܣ�������ң�������ʵ�־����߼���
+// 功能：设置玩家（由子类实现具体逻辑）
 //----------------------------------------------------
 void SceneBase::setupPlayer() {
-    // �����ʵ�֣�������д
+    // 基类实现，子类可覆写
 }
 
 //----------------------------------------------------
 // SceneBase::setupUI()
-// ���ܣ�����UI��������ʵ�־����߼���
+// 功能：设置UI（由子类实现具体逻辑）
 //----------------------------------------------------
 void SceneBase::setupUI() {
-    // �����ʵ�֣�������д
+    // 基类实现，子类可覆写
 }

@@ -197,28 +197,28 @@ void animals::harvest()
 // 游荡
 void animals::randmove(cocos2d::TMXTiledMap* tileMap)
 {
-    //这里的随机比较复杂，可以考虑更改
+    // 这里的随机比较复杂，可以考虑更改
     unsigned int timestamp = static_cast<unsigned int>(time(0)) * 1000 + static_cast<unsigned int>(clock()) / (CLOCKS_PER_SEC / 1000);
 
-    // ��ȡ����ID�����̼�Ĳ��죩
+    // 获取进程ID（不同进程的产物）
     unsigned int pid = static_cast<unsigned int>(getpid());
 
-    // ��ȡ�߳�ID������ж��̣߳�
+    // 获取线程ID（支持多线程）
     unsigned int tid = static_cast<unsigned int>(std::hash<std::thread::id>{}(std::this_thread::get_id()));
 
-    // ���ʱ���������ID���߳�ID������һ�����ӵ�����
+    // 将时间戳、进程ID和线程ID组合成一个更随机的种子
     unsigned int seed = timestamp ^ pid ^ tid;
 
     srand(seed + ID);
     dic = (rand() % rand() + ID) % 4;
     movement[dic] = 1;
 
-    // ��ʱ���� move_act��ÿ�����һ��
+    // 定时调度 move_act，每秒调用一次
     this->schedule([this, tileMap](float) {
         move_act(tileMap);
         }, 0.1f, "move_act_key");  
 
-    // 2���ִ�лص�����һ��
+    // 2秒后执行回调，停止一次
     this->scheduleOnce([this](float dt) {
         movement[dic] = 0;
         }, 2.0f, "one_time_schedule");
@@ -232,7 +232,7 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
         is_hit_edge[i] = false;
     }
 
-    //��ȡ�����λ��
+    // 获取精灵位置
     auto sprite_pos = this->getPosition();
     cocos2d::Size spriteSize = this->getContentSize();
     cocos2d::Size mapSize = tileMap->getMapSize();
@@ -241,7 +241,7 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
     mapSize.height *= tileSize.height;
     cocos2d::Vec2 origin = cocos2d::Director::getInstance()->getVisibleOrigin();
 
-    // �жϾ����Ƿ񳬳��߽�
+    // 判断精灵是否超出边界
     if (sprite_pos.y + spriteSize.height / 2 >= mapSize.height - EDGE1) {
         is_hit_edge[0] = true;
         //CCLOG("Sprite hit the top edge");
@@ -260,7 +260,7 @@ void animals::move_act(cocos2d::TMXTiledMap* tileMap)
     }
     for (int i = 0; i < 4; i++) {
         if (movement[i] && !is_hit_edge[i]) {
-            //�����ƶ�����
+            // 执行移动动作
             std::string dirStr[4] = { "-back","-front","-left","-right" };
             this->setSpriteFrame(_model->id + dirStr[i] + ".png");
             //this->setSpriteFrame(animals_name + dic[i] + ".png");
@@ -305,14 +305,14 @@ AnimalsManager* AnimalsManager::create()
         return nullptr;
     }
 }
-// ���Ӿ��鵽����
+// 添加精灵到队列
 void AnimalsManager::add_animals(animals* sprite) {
     animals_list.push_back(sprite);
 }
 
 void AnimalsManager::schedule_animals()
 {
-    // �������������ʾ���
+    // 安排动物自身的更新调度
     for (auto it = animals_list.begin(); it != animals_list.end(); ++it) {
         auto animal = *it;                      
         animal->schedule([animal](float dt) {   
